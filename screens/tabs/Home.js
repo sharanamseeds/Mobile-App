@@ -1,0 +1,342 @@
+import { ThemedView } from "../../components/ThemedView";
+import { ThemedText } from "../../components/ThemedText";
+import ThemeSafeAreaView from "../../components/ThemeSafeAreaView";
+import Carousel from "react-native-reanimated-carousel";
+import { Dimensions, Image, StyleSheet, TouchableOpacity, View } from "react-native";
+import { useThemeColor } from "../../hook/useThemeColor";
+import { FlatList } from "react-native-gesture-handler";
+import CartItemTotal from "../../components/CartItemTotal";
+import { useContext, useEffect, useState } from "react";
+import axios from "axios";
+import { BRANDLIST, CATEGORYLIST } from "../../constant/ApiRoutes";
+import { AuthContext } from "../../context/authContext";
+import { GetServerImage } from "../../helper/helper";
+import i18n from "../../i18n";
+
+const Home = ({ navigation }) => {
+  const width = Dimensions.get("window").width;
+  const primaryColor = useThemeColor({}, "primary");
+  const [categories, setCategories] = useState([]);
+  const [brands, setBrands] = useState([]);
+  const {showLoader, hideLoader} = useContext(AuthContext)
+
+  const CarouselData = [
+    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/x2kune1irghbrkuqdnt4.png",
+    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/gymonesl8f2t7tq4zmtc.png",
+    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/rlkqpcwusfo8vxp9bebf.png",
+    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/mufcbe8jfbboyek32tvl.png",
+    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/nomo4rrjitqm3jdqjwjd.png",
+  ];
+
+  const moveToProduct = ({name, value}) => {
+    navigation.navigate("ProductFilter", { [name]: value })
+  }
+
+  const renderCategory = ({ item, index }) => {
+    return (
+      <TouchableOpacity
+        key={`${index}_${item?.category_name}`}
+        style={{
+          marginRight: categories.length - 1 === index ? 0 : 20,
+          alignItems: "center",
+          width: 82,
+        }}
+        onPress={() => moveToProduct({name: "category_id", value: item?._id})}
+      >
+        <Image
+          source={{
+            uri: GetServerImage(item?.logo),
+          }}
+          width={80}
+          height={80}
+          style={{ borderRadius: 10 }}
+        />
+        <ThemedText style={{ marginTop: 8, fontWeight: 600 }}>{item?.category_name}</ThemedText>
+      </TouchableOpacity>
+    );
+  };
+
+  const renderBrand = ({ item, index }) => {
+    return (
+      <TouchableOpacity
+        key={`${index}_${item?.brand_name}`}
+        style={{
+          marginRight: brands.length - 1 === index ? 0 : 20,
+          alignItems: "center",
+          width: 82,
+        }}
+        onPress={() => moveToProduct({name: "brand_id", value: item?._id})}
+      >
+        <Image
+          source={{
+            uri: GetServerImage(item?.logo),
+          }}
+          width={80}
+          height={80}
+          style={{ borderRadius: 10 }}
+        />
+        <ThemedText style={{ marginTop: 8, fontWeight: 600 }}>{item?.brand_name}</ThemedText>
+      </TouchableOpacity>
+    );
+  };
+
+  const getCategories = async () => {
+    try {
+      showLoader()
+      const response = await axios.get(CATEGORYLIST);
+      setCategories(response?.data?.payload?.result?.data);
+      hideLoader()
+    } catch (error) {
+      console.log(error);
+      hideLoader()
+    }
+  };
+
+  const getBrands = async () => {
+    try {
+      showLoader()
+      const response = await axios.get(BRANDLIST);
+      setBrands(response?.data?.payload?.result?.data);
+      hideLoader()
+    } catch (error) {
+      hideLoader()
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getCategories();
+    getBrands();
+  }, [i18n.locale]);
+
+  return (
+    <>
+      <ThemeSafeAreaView>
+        <ThemedView>
+          <Carousel
+            loop
+            mode="parallax"
+            width={width}
+            height={width / 2}
+            autoPlay={true}
+            data={CarouselData}
+            autoPlayInterval={5000}
+            scrollAnimationDuration={1000}
+            renderItem={({ item, index }) => (
+              <ThemedView
+                style={{
+                  flex: 1,
+                  marginHorizontal: 4,
+                  borderRadius: 20,
+                  justifyContent: "center",
+                }}
+                key={index}
+              >
+                <Image
+                  source={{ uri: item }}
+                  style={{ width: "100%", height: "100%", borderRadius: 20 }}
+                />
+              </ThemedView>
+            )}
+          />
+        </ThemedView>
+        {categories && categories?.length > 0 && (
+          <ThemedView
+            style={{
+              ...styles.cardCategory,
+              backgroundColor: `${primaryColor}80`,
+              borderRadius: 10,
+            }}
+          >
+            <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
+              <ThemedText type="subtitle" style={{ fontWeight: 600, marginBottom: 10 }}>
+                {i18n.t('categories')}
+              </ThemedText>
+              <FlatList
+                nestedScrollEnabled={false}
+                scrollEnabled={true}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                data={categories}
+                renderItem={renderCategory}
+                keyExtractor={(item) => item._id}
+              />
+            </View>
+          </ThemedView>
+        )}
+        <ThemedView style={{ marginTop: 22, paddingHorizontal: 15 }}>
+          <ThemedText type="defaultSemiBold" style={{ fontSize: 22, fontWeight: 600 }}>
+            {i18n.t('feature_product')}
+          </ThemedText>
+        </ThemedView>
+        <ThemedView style={{ ...styles.carContainer, paddingHorizontal: 5 }}>
+          <View style={styles.card}>
+            <Image
+              source={{
+                uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/co7z0znktwrvvtd6dc7r.png",
+              }}
+              style={styles.image}
+            />
+            <View style={styles.textContainer}>
+              <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
+                Rice Seeds
+              </ThemedText>
+              <ThemedText style={styles.price}>$15/kg</ThemedText>
+            </View>
+            <TouchableOpacity style={styles.button}>
+              <ThemedText style={styles.buttonText}>+</ThemedText>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.card}>
+            <Image
+              source={{
+                uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/vzdpppfursczqm8tfsib.png",
+              }}
+              style={styles.image}
+            />
+            <View style={styles.textContainer}>
+              <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
+                Rice Seeds
+              </ThemedText>
+              <ThemedText style={styles.price}>$15/kg</ThemedText>
+            </View>
+            <TouchableOpacity style={styles.button}>
+              <ThemedText style={styles.buttonText}>+</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </ThemedView>
+        <ThemedView
+          style={{
+            ...styles.carContainer,
+            paddingHorizontal: 5,
+          }}
+        >
+          <View style={styles.card}>
+            <Image
+              source={{
+                uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/g698okn4omzbsxxlvik6.png",
+              }}
+              style={styles.image}
+            />
+            <View style={styles.textContainer}>
+              <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
+                Rice Seeds
+              </ThemedText>
+              <ThemedText style={styles.price}>$15/kg</ThemedText>
+            </View>
+            <TouchableOpacity style={styles.button}>
+              <ThemedText style={styles.buttonText}>+</ThemedText>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.card}>
+            <Image
+              source={{
+                uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/dcg7agjq3j04000anit2.png",
+              }}
+              style={styles.image}
+            />
+            <View style={styles.textContainer}>
+              <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
+                Rice Seeds
+              </ThemedText>
+              <ThemedText style={styles.price}>$15/kg</ThemedText>
+            </View>
+            <TouchableOpacity style={styles.button}>
+              <ThemedText style={styles.buttonText}>+</ThemedText>
+            </TouchableOpacity>
+          </View>
+        </ThemedView>
+        {brands?.length > 0 && (
+          <ThemedView
+            style={{
+              ...styles.cardCategory,
+              backgroundColor: `${primaryColor}80`,
+              borderRadius: 10,
+              marginTop: 10,
+              marginBottom: 20,
+            }}
+          >
+            <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
+              <ThemedText type="subtitle" style={{ fontWeight: 600, marginBottom: 10 }}>
+                {i18n.t('brand')}
+              </ThemedText>
+              <FlatList
+                nestedScrollEnabled={false}
+                scrollEnabled={true}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                data={brands}
+                renderItem={renderBrand}
+                keyExtractor={(item) => item._id}
+              />
+            </View>
+          </ThemedView>
+        )}
+        <ThemedView style={{ paddingHorizontal: 20, marginBottom: 20 }}>
+          <Image
+            source={{
+              uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/gymonesl8f2t7tq4zmtc.png",
+            }}
+            style={{ borderRadius: 20, resizeMode: "cover", width: "100%", height: 350 }}
+          />
+        </ThemedView>
+      </ThemeSafeAreaView>
+      <CartItemTotal navigation={navigation} />
+    </>
+  );
+};
+
+export default Home;
+
+const styles = StyleSheet.create({
+  cardCategory: {
+    flex: 1,
+  },
+  carContainer: {
+    flex: 1,
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  card: {
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "white",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    margin: 10,
+    width: "45%",
+  },
+  image: {
+    width: "100%",
+    height: 150,
+  },
+  textContainer: {
+    padding: 10,
+  },
+  title: {
+    fontSize: 16,
+  },
+  price: {
+    fontSize: 14,
+    color: "gray",
+  },
+  button: {
+    backgroundColor: "#19c394",
+    borderRadius: 5,
+    paddingVertical: 0,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    justifyContent: "center",
+    position: "absolute",
+    bottom: 12,
+    right: 10,
+  },
+  buttonText: {
+    color: "white",
+    fontSize: 20,
+    fontWeight: "bold",
+  },
+});

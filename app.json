@@ -1,0 +1,42 @@
+{
+  "expo": {
+    "name": "Agroveda",
+    "slug": "agro_apk",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/logo512.png",
+    "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "splash": {
+      "image": "./assets/logo_full.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/logo512.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "com.ravi0110.agro_apk",
+      "usesCleartextTraffic": true
+    },
+    "web": {
+      "favicon": "./assets/logo512.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-asset",
+      "expo-localization"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "24967682-d68f-4659-bd74-6c2e48e5c538"
+      }
+    }
+  }
+}
