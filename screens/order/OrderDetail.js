@@ -1,29 +1,27 @@
-import { Text, View, Image, StyleSheet, TouchableOpacity, useWindowDimensions } from "react-native";
+import { Text, View, Image, StyleSheet, TouchableOpacity, useWindowDimensions, Alert } from "react-native";
 import ThemeSafeAreaView from "../../components/ThemeSafeAreaView";
 import { ThemedView } from "../../components/ThemedView";
 import { useThemeColor } from "../../hook/useThemeColor";
 import { ThemedText } from "../../components/ThemedText";
 import { useContext, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { ADDCART, DEC, DELITEM, INC } from "../../redux/cart/CartSlice";
 import { Feather } from "@expo/vector-icons";
-import CartItemTotal from "../../components/CartItemTotal";
 import axios from "axios";
-import { ORDERDETAIL } from "../../constant/ApiRoutes";
-import HTMLView from "react-native-htmlview";
-import { GetServerImage } from "../../helper/helper";
+import { DOWNLOADBILL, ORDERDETAIL, RETURNORDER } from "../../constant/ApiRoutes";
+import { GetServerImage, ShowErrorToast, ShowSuccessToast } from "../../helper/helper";
 import { AuthContext } from "../../context/authContext";
 import moment from "moment";
 import i18n from "../../i18n";
+import * as Print from 'expo-print';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
 
 const OrderDetail = ({ navigation, route }) => {
   // theme color
   const boxColor = useThemeColor({}, "boxColor");
   const boxShadow = useThemeColor({}, "boxShadow");
-  const textColor = useThemeColor({}, "text");
   const primaryColor = useThemeColor({}, "primary");
+  const secondaryColor = useThemeColor({}, "secondary")
   const { pid } = route.params;
-  const { cartItem } = useSelector((state) => state?.cartItem);
   const [orderDetail, setOrderDetail] = useState([]);
   const { showLoader, hideLoader } = useContext(AuthContext);
 
@@ -87,7 +85,52 @@ const OrderDetail = ({ navigation, route }) => {
     }
   };
 
-  const cartData = cartItem.find((f) => f.id === pid);
+  const downloadBill = async (id) => {
+    try {
+      showLoader();
+      const result = await axios.get(`${DOWNLOADBILL}/${id}`);
+      createAndDownloadPdf(result?.data);
+    } catch (error) {
+      console.log(error);
+      hideLoader();
+    }
+  };
+
+  const createAndDownloadPdf = async (htmlContent) => {
+    try {
+      // Generate the PDF
+      const { uri } = await Print.printToFileAsync({ html: htmlContent });
+      console.log(uri)
+      // Define the file path where you want to save the PDF
+      const fileName = `${FileSystem.documentDirectory}${orderDetail?._id}.pdf`;
+
+      await FileSystem.copyAsync({
+        from: uri,
+        to: fileName,
+      });
+
+      // Optionally share the file after download
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileName);
+      }
+
+      hideLoader();
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+    }
+  };
+
+  const returnOrder = async(order_id) => {
+    try {
+      showLoader()
+      const result = await axios.post(`${RETURNORDER}/${order_id}?payload=${JSON.stringify({reason: 'return'})}`)
+      ShowSuccessToast(result?.data?.message)
+      hideLoader()
+    } catch(error) {
+      ShowErrorToast(error.response?.data?.message)
+      hideLoader()
+    }
+  }
 
   useEffect(() => {
     console.log(pid);
@@ -108,19 +151,19 @@ const OrderDetail = ({ navigation, route }) => {
           }}
         >
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <ThemedText style={{ fontSize: 17 }}>{i18n.t('order_date')} :</ThemedText>
+            <ThemedText style={{ fontSize: 17 }}>{i18n.t("order_date")} :</ThemedText>
             <ThemedText style={{ fontSize: 16, fontWeight: 600, marginLeft: 10 }}>
               {orderDetail?.createdAt ? moment(orderDetail?.createdAt).format("DD MMM YYYY") : ""}
             </ThemedText>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <ThemedText style={{ fontSize: 17 }}>{i18n.t('order')} # :</ThemedText>
+            <ThemedText style={{ fontSize: 17 }}>{i18n.t("order")} # :</ThemedText>
             <ThemedText style={{ fontSize: 16, fontWeight: 600, marginLeft: 10 }}>
               {orderDetail?._id}
             </ThemedText>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <ThemedText style={{ fontSize: 17 }}>{i18n.t('order_amount')} :</ThemedText>
+            <ThemedText style={{ fontSize: 17 }}>{i18n.t("order_amount")} :</ThemedText>
             <ThemedText style={{ fontSize: 16, fontWeight: 600, marginLeft: 10 }}>
               ₹ {orderDetail?.billing_amount?.toFixed(2)}
             </ThemedText>
@@ -139,15 +182,17 @@ const OrderDetail = ({ navigation, route }) => {
             marginBottom: 1,
           }}
         >
-          <ThemedText style={{ fontSize: 18, marginBottom: 15 }}>{i18n.t('order_status_detail')}</ThemedText>
+          <ThemedText style={{ fontSize: 18, marginBottom: 15 }}>
+            {i18n.t("order_status_detail")}
+          </ThemedText>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <ThemedText style={{ fontSize: 17 }}>{i18n.t('order_type')} :</ThemedText>
+            <ThemedText style={{ fontSize: 17 }}>{i18n.t("order_type")} :</ThemedText>
             <ThemedText style={{ fontSize: 16, fontWeight: 600, marginLeft: 10 }}>
               {orderDetail?.order_type?.toUpperCase()}
             </ThemedText>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <ThemedText style={{ fontSize: 17 }}>{i18n.t('order_status')} :</ThemedText>
+            <ThemedText style={{ fontSize: 17 }}>{i18n.t("order_status")} :</ThemedText>
             <ThemedText
               style={{
                 fontSize: 16,
@@ -159,6 +204,58 @@ const OrderDetail = ({ navigation, route }) => {
               {status?.find((f) => f.value === orderDetail?.status)?.label}
             </ThemedText>
           </View>
+          {orderDetail?.is_creditable && (
+            <TouchableOpacity
+              style={{
+                backgroundColor: secondaryColor,
+                padding: 8,
+                borderRadius: 50,
+                marginTop: 8,
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => returnOrder(orderDetail?._id)}
+            >
+              <Text
+                style={{
+                  color: "#FFF",
+                  textAlign: "center",
+                  fontSize: 18,
+                  textTransform: "uppercase",
+                }}
+              >
+                Return Order
+              </Text>
+              <Feather name="repeat" color="#FFF" size={20} style={{ marginLeft: 5 }} />
+            </TouchableOpacity>
+          )}
+          {orderDetail?.bill_id && (
+            <TouchableOpacity
+              style={{
+                backgroundColor: primaryColor,
+                padding: 8,
+                borderRadius: 50,
+                marginTop: 8,
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => downloadBill(orderDetail?.bill_id)}
+            >
+              <Text
+                style={{
+                  color: "#FFF",
+                  textAlign: "center",
+                  fontSize: 18,
+                  textTransform: "uppercase",
+                }}
+              >
+                Download Bill
+              </Text>
+              <Feather name="download" color="#FFF" size={20} style={{ marginLeft: 5 }} />
+            </TouchableOpacity>
+          )}
         </ThemedView>
         <ThemedView
           style={{
@@ -169,7 +266,9 @@ const OrderDetail = ({ navigation, route }) => {
             marginTop: 1,
           }}
         >
-          <ThemedText style={{ fontSize: 18, marginBottom: 12 }}>{i18n.t('product_detail')}</ThemedText>
+          <ThemedText style={{ fontSize: 18, marginBottom: 12 }}>
+            {i18n.t("product_detail")}
+          </ThemedText>
           {orderDetail?.products &&
             orderDetail?.products?.length > 0 &&
             orderDetail?.products.map((item, index) => (
@@ -203,19 +302,25 @@ const OrderDetail = ({ navigation, route }) => {
                         <ThemedText style={{ ...styles.price, marginTop: -2 }}>
                           {item?.product_code}
                         </ThemedText>
-                        <ThemedText style={{ ...styles.title }}>₹ {item?.total_amount?.toFixed(2)}</ThemedText>
+                        <ThemedText style={{ ...styles.title }}>
+                          ₹ {item?.total_amount?.toFixed(2)}
+                        </ThemedText>
                       </TouchableOpacity>
                     </View>
                   </View>
                   <View style={{ flex: 1, alignItems: "flex-end" }}>
                     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-                      <ThemedText style={{ color: "gray", fontSize: 12 }}>{i18n.t('quantity')}:</ThemedText>
+                      <ThemedText style={{ color: "gray", fontSize: 12 }}>
+                        {i18n.t("quantity")}:
+                      </ThemedText>
                       <ThemedText style={{ fontSize: 12, marginLeft: 5 }}>
                         {item?.quantity}
                       </ThemedText>
                     </View>
                     <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-                      <ThemedText style={{ color: "gray", fontSize: 12 }}>{i18n.t('item_total')}:</ThemedText>
+                      <ThemedText style={{ color: "gray", fontSize: 12 }}>
+                        {i18n.t("item_total")}:
+                      </ThemedText>
                       <ThemedText style={{ fontSize: 12, marginLeft: 5 }}>
                         ₹ {item?.total_amount?.toFixed(2)}
                       </ThemedText>
@@ -228,7 +333,9 @@ const OrderDetail = ({ navigation, route }) => {
                         marginTop: -4,
                       }}
                     >
-                      <ThemedText style={{ color: "gray", fontSize: 12 }}>{i18n.t('tax')}:</ThemedText>
+                      <ThemedText style={{ color: "gray", fontSize: 12 }}>
+                        {i18n.t("tax")}:
+                      </ThemedText>
                       <ThemedText style={{ fontSize: 12, marginLeft: 5 }}>
                         ₹ {item?.gst_amount?.toFixed(2)}
                       </ThemedText>
@@ -241,7 +348,9 @@ const OrderDetail = ({ navigation, route }) => {
                         marginTop: -4,
                       }}
                     >
-                      <ThemedText style={{ color: "gray", fontSize: 12 }}>{i18n.t('discount')}:</ThemedText>
+                      <ThemedText style={{ color: "gray", fontSize: 12 }}>
+                        {i18n.t("discount")}:
+                      </ThemedText>
                       <ThemedText style={{ fontSize: 12, marginLeft: 5 }}>
                         - ₹ {item?.offer_discount?.toFixed(2)}
                       </ThemedText>

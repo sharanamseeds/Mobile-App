@@ -35,12 +35,14 @@ const Stack = createNativeStackNavigator();
 const BottomTab = createBottomTabNavigator();
 
 const CustomHeader = () => {
-  const {userName} = useContext(AuthContext)
+  const { userName } = useContext(AuthContext);
   return (
     <View>
-      <ThemedText style={{ fontSize: 20, fontWeight: 600 }}>{i18n.t('hi')} {userName}!</ThemedText>
+      <ThemedText style={{ fontSize: 20, fontWeight: 600 }}>
+        {i18n.t("hi")} {userName}!
+      </ThemedText>
       <ThemedText style={{ fontSize: 12, fontWeight: 600, color: "grey" }}>
-        {i18n.t('enjoy')} !
+        {i18n.t("enjoy")} !
       </ThemedText>
     </View>
   );
@@ -60,7 +62,7 @@ const TabNav = ({ navigation }) => {
   const darkColor = useThemeColor({}, "darkColor");
   const primaryColor = useThemeColor({}, "primary");
   const background = useThemeColor({ light: lightColor, dark: darkColor }, "background");
-  
+
   return (
     <>
       <BottomTab.Navigator
@@ -78,7 +80,7 @@ const TabNav = ({ navigation }) => {
             fontWeight: 800,
           },
           headerRight: () => (
-            <TouchableOpacity onPress={() => navigation.navigate('Language')}>
+            <TouchableOpacity onPress={() => navigation.navigate("Language")}>
               <Feather
                 name="globe"
                 size={24}
@@ -100,6 +102,8 @@ const TabNav = ({ navigation }) => {
               iconName = focused ? "home" : "home-outline";
             } else if (route.name === "Product") {
               iconName = focused ? "bag" : "bag-outline";
+            } else if (route.name === "Order") {
+              iconName = focused ? "browsers" : "browsers-outline";
             } else if (route.name === "Ladger") {
               iconName = focused ? "newspaper" : "newspaper-outline";
             } else if (route.name === "Profile") {
@@ -127,13 +131,15 @@ const TabNav = ({ navigation }) => {
           tabBarLabel: ({ focused, color }) => {
             let label;
             if (route.name === "HomeStack") {
-              label = i18n.t('home');
+              label = i18n.t("home");
             } else if (route.name === "Product") {
-              label = i18n.t('product');
+              label = i18n.t("product");
+            } else if (route.name === "Order") {
+              label = i18n.t("orders");
             } else if (route.name === "Ladger") {
-              label = i18n.t('ladger');
+              label = i18n.t("ladger");
             } else if (route.name === "Profile") {
-              label = i18n.t('profile');
+              label = i18n.t("profile");
             }
 
             return (
@@ -166,7 +172,7 @@ const TabNav = ({ navigation }) => {
         <BottomTab.Screen
           name="HomeStack"
           options={{
-            headerTitle: (props) => <CustomHeader {...props} />
+            headerTitle: (props) => <CustomHeader {...props} />,
           }}
           component={Home}
         />
@@ -174,7 +180,25 @@ const TabNav = ({ navigation }) => {
           name="Product"
           component={Product}
           options={{
-            headerTitle: (props) => <CustomTitle {...props} title={i18n.t('product')} />,
+            headerTitle: (props) => <CustomTitle {...props} title={i18n.t("product")} />,
+            headerTitleAlign: "center",
+            headerLeft: () => (
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Feather
+                  name="chevron-left"
+                  size={30}
+                  style={{ marginLeft: 15 }}
+                  color={textColor}
+                />
+              </TouchableOpacity>
+            ),
+          }}
+        />
+        <BottomTab.Screen
+          name="Order"
+          component={MyOrder}
+          options={{
+            headerTitle: (props) => <CustomTitle {...props} title={i18n.t("order")} />,
             headerTitleAlign: "center",
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -192,7 +216,7 @@ const TabNav = ({ navigation }) => {
           name="Ladger"
           component={Ledger}
           options={{
-            headerTitle: (props) => <CustomTitle {...props} title={i18n.t('ladger')} />,
+            headerTitle: (props) => <CustomTitle {...props} title={i18n.t("ladger")} />,
             headerTitleAlign: "center",
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -210,7 +234,7 @@ const TabNav = ({ navigation }) => {
           name="Profile"
           component={User}
           options={{
-            headerTitle: (props) => <CustomTitle {...props} title={i18n.t('profile')} />,
+            headerTitle: (props) => <CustomTitle {...props} title={i18n.t("profile")} />,
             headerTitleAlign: "center",
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -239,7 +263,7 @@ const StackNav = () => {
   return (
     <Stack.Navigator
       screenOptions={{
-        animation: "none"
+        animation: "none",
       }}
     >
       <Stack.Screen
@@ -253,7 +277,7 @@ const StackNav = () => {
         name="ProductDetail"
         component={ProductDetail}
         options={({ navigation }) => ({
-          headerTitle: (props) => <CustomTitle {...props} title={i18n.t('product_detail')} />,
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("product_detail")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,
@@ -270,7 +294,7 @@ const StackNav = () => {
         name="Account"
         component={MyAccount}
         options={({ navigation }) => ({
-          headerTitle: (props) => <CustomTitle {...props} title={i18n.t('my_account')} />,
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("my_account")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,
@@ -287,7 +311,7 @@ const StackNav = () => {
         name="Cart"
         component={MyCart}
         options={({ navigation }) => ({
-          headerTitle: (props) => <CustomTitle {...props} title={i18n.t('my_cart')} />,
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("my_cart")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,
@@ -304,7 +328,7 @@ const StackNav = () => {
         name="Order"
         component={MyOrder}
         options={({ navigation }) => ({
-          headerTitle: (props) => <CustomTitle {...props} title={i18n.t('my_order')} />,
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("my_order")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,
@@ -321,7 +345,7 @@ const StackNav = () => {
         name="OrderDetail"
         component={OrderDetail}
         options={({ navigation }) => ({
-          headerTitle: (props) => <CustomTitle {...props} title={i18n.t('order_detail')} />,
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("order_detail")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,
@@ -338,7 +362,7 @@ const StackNav = () => {
         name="ChangePassword"
         component={ChangePassword}
         options={({ navigation }) => ({
-          headerTitle: (props) => <CustomTitle {...props} title={i18n.t('change_password')} />,
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("change_password")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,
@@ -351,11 +375,11 @@ const StackNav = () => {
           headerBackVisible: false,
         })}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="ProductFilter"
         component={ProductFilter}
         options={({ navigation }) => ({
-          headerTitle: (props) => <CustomTitle {...props} title={i18n.t('product')} />,
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("product")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,
@@ -368,11 +392,11 @@ const StackNav = () => {
           headerBackVisible: false,
         })}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="EditProfile"
         component={ProfileEdit}
         options={({ navigation }) => ({
-          headerTitle: (props) => <CustomTitle {...props} title={i18n.t('edit_profile')} />,
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("edit_profile")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,
@@ -385,11 +409,11 @@ const StackNav = () => {
           headerBackVisible: false,
         })}
       />
-       <Stack.Screen
+      <Stack.Screen
         name="Language"
         component={Language}
         options={({ navigation }) => ({
-          headerTitle: (props) => <CustomTitle {...props} title={i18n.t('language')} />,
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("language")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,
@@ -408,20 +432,24 @@ const StackNav = () => {
 
 const Navbar = () => {
   const colorScheme = useColorScheme();
-  const {loading, setUserName, changeLanguage} = useContext(AuthContext)
-  const dispatch = useDispatch()
+  const { loading, setUserName, changeLanguage } = useContext(AuthContext);
+  const dispatch = useDispatch();
 
-  const setCartItem = async() => {
-    const CartItem = await AsyncStorage.getItem('cartdata') ? JSON.parse(await AsyncStorage.getItem('cartdata')) : []
-    dispatch(SETCARTITEM(CartItem))
-    const userData = await AsyncStorage.getItem('user_data') ? JSON.parse(await AsyncStorage.getItem('user_data')) : {}
-    setUserName(userData?.name)
-    changeLanguage(await AsyncStorage.getItem('lang') || 'en')
-  }
+  const setCartItem = async () => {
+    const CartItem = (await AsyncStorage.getItem("cartdata"))
+      ? JSON.parse(await AsyncStorage.getItem("cartdata"))
+      : [];
+    dispatch(SETCARTITEM(CartItem));
+    const userData = (await AsyncStorage.getItem("user_data"))
+      ? JSON.parse(await AsyncStorage.getItem("user_data"))
+      : {};
+    setUserName(userData?.name);
+    changeLanguage((await AsyncStorage.getItem("lang")) || "en");
+  };
 
   useEffect(() => {
-    setCartItem()
-  }, [])
+    setCartItem();
+  }, []);
 
   return (
     <>
@@ -430,7 +458,7 @@ const Navbar = () => {
           <StackNav />
         </GestureHandlerRootView>
       </NavigationContainer>
-      <GlobalLoader visible={loading}/>
+      <GlobalLoader visible={loading} />
     </>
   );
 };

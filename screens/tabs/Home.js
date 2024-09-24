@@ -8,7 +8,7 @@ import { FlatList } from "react-native-gesture-handler";
 import CartItemTotal from "../../components/CartItemTotal";
 import { useContext, useEffect, useState } from "react";
 import axios from "axios";
-import { BRANDLIST, CATEGORYLIST } from "../../constant/ApiRoutes";
+import { BANNER, BRANDLIST, CATEGORYLIST, PRODUCTLIST } from "../../constant/ApiRoutes";
 import { AuthContext } from "../../context/authContext";
 import { GetServerImage } from "../../helper/helper";
 import i18n from "../../i18n";
@@ -18,19 +18,13 @@ const Home = ({ navigation }) => {
   const primaryColor = useThemeColor({}, "primary");
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
-  const {showLoader, hideLoader} = useContext(AuthContext)
+  const [CarouselData, setCarouselData] = useState([]);
+  const [featureProduct, setFeatureProduct] = useState([]);
+  const { showLoader, hideLoader } = useContext(AuthContext);
 
-  const CarouselData = [
-    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/x2kune1irghbrkuqdnt4.png",
-    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/gymonesl8f2t7tq4zmtc.png",
-    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/rlkqpcwusfo8vxp9bebf.png",
-    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/mufcbe8jfbboyek32tvl.png",
-    "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/nomo4rrjitqm3jdqjwjd.png",
-  ];
-
-  const moveToProduct = ({name, value}) => {
-    navigation.navigate("ProductFilter", { [name]: value })
-  }
+  const moveToProduct = ({ name, value }) => {
+    navigation.navigate("ProductFilter", { [name]: value });
+  };
 
   const renderCategory = ({ item, index }) => {
     return (
@@ -41,7 +35,7 @@ const Home = ({ navigation }) => {
           alignItems: "center",
           width: 82,
         }}
-        onPress={() => moveToProduct({name: "category_id", value: item?._id})}
+        onPress={() => moveToProduct({ name: "category_id", value: item?._id })}
       >
         <Image
           source={{
@@ -65,7 +59,7 @@ const Home = ({ navigation }) => {
           alignItems: "center",
           width: 82,
         }}
-        onPress={() => moveToProduct({name: "brand_id", value: item?._id})}
+        onPress={() => moveToProduct({ name: "brand_id", value: item?._id })}
       >
         <Image
           source={{
@@ -80,26 +74,73 @@ const Home = ({ navigation }) => {
     );
   };
 
+  const renderFeatureProduct = ({ item, index }) => {
+    return (
+      <TouchableOpacity
+        style={styles.card}
+        key={item?._id}
+        onPress={() => navigation.navigate("ProductDetail", { pid: item?._id })}
+      >
+        <Image
+          source={{
+            uri: GetServerImage(item?.images?.[0]),
+          }}
+          style={styles.image}
+        />
+        <View style={styles.textContainer}>
+          <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
+            {item?.product_name}
+          </ThemedText>
+          <ThemedText style={styles.price}>₹ {item?.price}</ThemedText>
+        </View>
+      </TouchableOpacity>
+    );
+  };
+
   const getCategories = async () => {
     try {
-      showLoader()
+      showLoader();
       const response = await axios.get(CATEGORYLIST);
       setCategories(response?.data?.payload?.result?.data);
-      hideLoader()
+      hideLoader();
     } catch (error) {
       console.log(error);
-      hideLoader()
+      hideLoader();
     }
   };
 
   const getBrands = async () => {
     try {
-      showLoader()
+      showLoader();
       const response = await axios.get(BRANDLIST);
       setBrands(response?.data?.payload?.result?.data);
-      hideLoader()
+      hideLoader();
     } catch (error) {
-      hideLoader()
+      hideLoader();
+      console.log(error);
+    }
+  };
+
+  const getBanner = async () => {
+    try {
+      showLoader();
+      const response = await axios.get(BANNER);
+      setCarouselData(response.data?.payload?.result?.images);
+      hideLoader();
+    } catch (error) {
+      hideLoader();
+      console.log(error);
+    }
+  };
+
+  const getFeatureProduct = async () => {
+    try {
+      showLoader();
+      const response = await axios.get(`${PRODUCTLIST}?is_featured=true`);
+      setFeatureProduct(response.data?.payload?.result?.data);
+      hideLoader();
+    } catch (error) {
+      hideLoader();
       console.log(error);
     }
   };
@@ -109,37 +150,44 @@ const Home = ({ navigation }) => {
     getBrands();
   }, [i18n.locale]);
 
+  useEffect(() => {
+    getBanner();
+    getFeatureProduct();
+  }, []);
+
   return (
     <>
       <ThemeSafeAreaView>
-        <ThemedView>
-          <Carousel
-            loop
-            mode="parallax"
-            width={width}
-            height={width / 2}
-            autoPlay={true}
-            data={CarouselData}
-            autoPlayInterval={5000}
-            scrollAnimationDuration={1000}
-            renderItem={({ item, index }) => (
-              <ThemedView
-                style={{
-                  flex: 1,
-                  marginHorizontal: 4,
-                  borderRadius: 20,
-                  justifyContent: "center",
-                }}
-                key={index}
-              >
-                <Image
-                  source={{ uri: item }}
-                  style={{ width: "100%", height: "100%", borderRadius: 20 }}
-                />
-              </ThemedView>
-            )}
-          />
-        </ThemedView>
+        {CarouselData?.length > 0 && (
+          <ThemedView>
+            <Carousel
+              loop
+              mode="parallax"
+              width={width}
+              height={width / 2}
+              autoPlay={true}
+              data={CarouselData}
+              autoPlayInterval={5000}
+              scrollAnimationDuration={1000}
+              renderItem={({ item, index }) => (
+                <ThemedView
+                  style={{
+                    flex: 1,
+                    marginHorizontal: 4,
+                    borderRadius: 20,
+                    justifyContent: "center",
+                  }}
+                  key={index}
+                >
+                  <Image
+                    source={{ uri: GetServerImage(item) }}
+                    style={{ width: "100%", height: "100%", borderRadius: 20 }}
+                  />
+                </ThemedView>
+              )}
+            />
+          </ThemedView>
+        )}
         {categories && categories?.length > 0 && (
           <ThemedView
             style={{
@@ -150,7 +198,7 @@ const Home = ({ navigation }) => {
           >
             <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
               <ThemedText type="subtitle" style={{ fontWeight: 600, marginBottom: 10 }}>
-                {i18n.t('categories')}
+                {i18n.t("categories")}
               </ThemedText>
               <FlatList
                 nestedScrollEnabled={false}
@@ -164,88 +212,27 @@ const Home = ({ navigation }) => {
             </View>
           </ThemedView>
         )}
-        <ThemedView style={{ marginTop: 22, paddingHorizontal: 15 }}>
-          <ThemedText type="defaultSemiBold" style={{ fontSize: 22, fontWeight: 600 }}>
-            {i18n.t('feature_product')}
-          </ThemedText>
-        </ThemedView>
-        <ThemedView style={{ ...styles.carContainer, paddingHorizontal: 5 }}>
-          <View style={styles.card}>
-            <Image
-              source={{
-                uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/co7z0znktwrvvtd6dc7r.png",
-              }}
-              style={styles.image}
-            />
-            <View style={styles.textContainer}>
-              <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
-                Rice Seeds
+        {featureProduct?.length > 0 && (
+          <>
+            <ThemedView style={{ marginTop: 22, paddingHorizontal: 15 }}>
+              <ThemedText type="defaultSemiBold" style={{ fontSize: 22, fontWeight: 600 }}>
+                {i18n.t("feature_product")}
               </ThemedText>
-              <ThemedText style={styles.price}>$15/kg</ThemedText>
-            </View>
-            <TouchableOpacity style={styles.button}>
-              <ThemedText style={styles.buttonText}>+</ThemedText>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.card}>
-            <Image
-              source={{
-                uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/vzdpppfursczqm8tfsib.png",
-              }}
-              style={styles.image}
-            />
-            <View style={styles.textContainer}>
-              <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
-                Rice Seeds
-              </ThemedText>
-              <ThemedText style={styles.price}>$15/kg</ThemedText>
-            </View>
-            <TouchableOpacity style={styles.button}>
-              <ThemedText style={styles.buttonText}>+</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </ThemedView>
-        <ThemedView
-          style={{
-            ...styles.carContainer,
-            paddingHorizontal: 5,
-          }}
-        >
-          <View style={styles.card}>
-            <Image
-              source={{
-                uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/g698okn4omzbsxxlvik6.png",
-              }}
-              style={styles.image}
-            />
-            <View style={styles.textContainer}>
-              <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
-                Rice Seeds
-              </ThemedText>
-              <ThemedText style={styles.price}>$15/kg</ThemedText>
-            </View>
-            <TouchableOpacity style={styles.button}>
-              <ThemedText style={styles.buttonText}>+</ThemedText>
-            </TouchableOpacity>
-          </View>
-          <View style={styles.card}>
-            <Image
-              source={{
-                uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/dcg7agjq3j04000anit2.png",
-              }}
-              style={styles.image}
-            />
-            <View style={styles.textContainer}>
-              <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
-                Rice Seeds
-              </ThemedText>
-              <ThemedText style={styles.price}>$15/kg</ThemedText>
-            </View>
-            <TouchableOpacity style={styles.button}>
-              <ThemedText style={styles.buttonText}>+</ThemedText>
-            </TouchableOpacity>
-          </View>
-        </ThemedView>
+            </ThemedView>
+            <ThemedView style={{ paddingHorizontal: 5 }}>
+              <FlatList
+                nestedScrollEnabled={false}
+                scrollEnabled={true}
+                horizontal={true}
+                showsHorizontalScrollIndicator={false}
+                data={featureProduct}
+                renderItem={renderFeatureProduct}
+                keyExtractor={(item) => item._id}
+              />
+            </ThemedView>
+          </>
+        )}
+
         {brands?.length > 0 && (
           <ThemedView
             style={{
@@ -258,7 +245,7 @@ const Home = ({ navigation }) => {
           >
             <View style={{ paddingHorizontal: 20, paddingVertical: 10 }}>
               <ThemedText type="subtitle" style={{ fontWeight: 600, marginBottom: 10 }}>
-                {i18n.t('brand')}
+                {i18n.t("brand")}
               </ThemedText>
               <FlatList
                 nestedScrollEnabled={false}
@@ -307,7 +294,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     margin: 10,
-    width: "45%",
+    width: 170,
   },
   image: {
     width: "100%",
