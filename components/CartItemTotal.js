@@ -19,7 +19,7 @@ const CartItemTotal = ({ navigation }) => {
         cartItem.map((p) => Product.push({product_id: p?._id, offer_id: p?.selectedOffer || p?.offers?.[0]?._id , quantity: p?.qty}))
       }
       const productParams = JSON.stringify({products: Product})
-      const result = await axios.post(`${CALCULATEBILL}?payload=${productParams}`)
+      const result = await axios.post(`${CALCULATEBILL}?payload=${productParams}&lang_code=${i18n.locale}`)
       setBillingAmount(result?.data?.payload?.result?.billing_amount)
     } catch (error){
       console.log(error?.response?.data, "error")

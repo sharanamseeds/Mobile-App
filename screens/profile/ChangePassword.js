@@ -47,7 +47,7 @@ const ChangePassword = () => {
   const handlePress = async () => {
     if (!validate()) {
       showLoader();
-      const response = await axios.post(CHANGEPASSWORD, formDetail)
+      const response = await axios.post(`${CHANGEPASSWORD}?lang_code=${i18n.locale}`, formDetail)
       try {
       } catch (error) {
         console.log(error?.response?.data?.message);

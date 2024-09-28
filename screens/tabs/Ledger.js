@@ -1,4 +1,12 @@
-import { FlatList, Modal, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  Modal,
+  RefreshControl,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import ThemeSafeAreaView from "../../components/ThemeSafeAreaView";
 import { ThemedView } from "../../components/ThemedView";
 import { useThemeColor } from "../../hook/useThemeColor";
@@ -14,7 +22,7 @@ import { SearchBar } from "react-native-elements";
 import { debounce } from "lodash";
 import i18n from "../../i18n";
 
-const Ledger = () => {
+const Ledger = ({ navigation }) => {
   const textColor = useThemeColor({}, "text");
   const primaryColor = useThemeColor({}, "primary");
   const secondaryColor = useThemeColor({}, "secondary");
@@ -25,7 +33,7 @@ const Ledger = () => {
   const background = useThemeColor({ light: lightColor, dark: darkColor }, "background");
   const [ledgerData, setLedgerData] = useState({});
   const [ledgerList, setLedgerList] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState("")
+  const [selectedFilter, setSelectedFilter] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [filter, setFilter] = useState({
     type: "",
@@ -38,26 +46,23 @@ const Ledger = () => {
 
   const fetchLedger = async () => {
     try {
-      showLoader();
-      const response = await axios.get(USERDETAIL);
+      const response = await axios.get(`${USERDETAIL}?lang_code=${i18n.locale}`);
       setLedgerData(response?.data?.payload?.result);
-      hideLoader();
     } catch (error) {
-      console.log(error?.response?.data?.message)
-      hideLoader();
-      console.log(error);
+      console.log(error?.response?.data?.message);
     }
   };
 
   const fetchLedgerList = async (reset = false, searchTerm = "") => {
     if (loading || (!hasMore && !reset)) return;
     setRefreshing(false);
-    showLoader()
+    showLoader();
     try {
       const params = {
         page: reset ? 1 : page,
         search: searchTerm,
         type: filter?.type,
+        lang_code: i18n.locale,
       };
 
       const response = await axios.get(LEDGERLIST, { params });
@@ -69,7 +74,9 @@ const Ledger = () => {
       } else {
         setHasMore(false);
       }
-      hideLoader();
+      setTimeout(() => {
+        hideLoader();
+      }, 2000);
     } catch (error) {
       hideLoader();
       console.log(error);
@@ -134,14 +141,17 @@ const Ledger = () => {
 
   useEffect(() => {
     fetchLedger();
-  }, []);
+  }, [i18n.locale]);
 
   useEffect(() => {
     setLedgerList([]);
     setHasMore(true);
     setPage(1);
     fetchLedgerList(true);
-  }, [filter]);
+    navigation.setOptions({
+      title: i18n.t("ladger"),
+    });
+  }, [filter, i18n.locale]);
 
   return (
     <ThemeSafeAreaViewWOS>
@@ -154,7 +164,7 @@ const Ledger = () => {
         }}
       >
         <View>
-          <ThemedText style={{ fontSize: 16 }}>{i18n.t('total_outstanding')}</ThemedText>
+          <ThemedText style={{ fontSize: 16 }}>{i18n.t("total_outstanding")}</ThemedText>
           <ThemedText style={{ fontSize: 22, fontWeight: 600, marginTop: 8 }}>
             ₹ {ledgerData?.finalBalance}
           </ThemedText>
@@ -192,7 +202,7 @@ const Ledger = () => {
         }}
       >
         <View>
-          <ThemedText style={{ fontSize: 16 }}>{i18n.t('available_credit_limit')}</ThemedText>
+          <ThemedText style={{ fontSize: 16 }}>{i18n.t("available_credit_limit")}</ThemedText>
           <ThemedText style={{ fontSize: 22, fontWeight: 600, marginTop: 8 }}>
             ₹ {ledgerData?.totalMoneyAdded}
           </ThemedText>
@@ -207,7 +217,9 @@ const Ledger = () => {
           marginBottom: 12,
         }}
       >
-        <ThemedText style={{ fontSize: 18, marginBottom: 5 }}>{i18n.t('all_transaction_list')}</ThemedText>
+        <ThemedText style={{ fontSize: 18, marginBottom: 5 }}>
+          {i18n.t("all_transaction_list")}
+        </ThemedText>
         <ThemedView
           style={{
             flexDirection: "row",
@@ -216,7 +228,7 @@ const Ledger = () => {
           }}
         >
           <SearchBar
-            placeholder={i18n.t('type_here')}
+            placeholder={i18n.t("type_here")}
             round={true}
             containerStyle={{
               backgroundColor: background,
@@ -289,7 +301,9 @@ const Ledger = () => {
             }}
           >
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={{ color: textColor, fontSize: 20, fontWeight: 600 }}>{i18n.t('filters')}</Text>
+              <Text style={{ color: textColor, fontSize: 20, fontWeight: 600 }}>
+                {i18n.t("filters")}
+              </Text>
               <Feather
                 name="x"
                 size={22}
@@ -303,7 +317,7 @@ const Ledger = () => {
                 style={{ flexDirection: "row" }}
                 onPress={() => {
                   setSelectedFilter("");
-                  setFilter({...filter, type: ""})
+                  setFilter({ ...filter, type: "" });
                   setModalVisible(false);
                 }}
               >
@@ -317,13 +331,13 @@ const Ledger = () => {
                     marginBottom: 15,
                   }}
                 ></View>
-                <ThemedText>{i18n.t('all')}</ThemedText>
+                <ThemedText>{i18n.t("all")}</ThemedText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{ flexDirection: "row" }}
                 onPress={() => {
                   setSelectedFilter("credit");
-                  setFilter({...filter, type: "credit"})
+                  setFilter({ ...filter, type: "credit" });
                   setModalVisible(false);
                 }}
               >
@@ -337,13 +351,13 @@ const Ledger = () => {
                     marginBottom: 15,
                   }}
                 ></View>
-                <ThemedText>{i18n.t('by_credit')}</ThemedText>
+                <ThemedText>{i18n.t("by_credit")}</ThemedText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{ flexDirection: "row" }}
                 onPress={() => {
                   setSelectedFilter("debit");
-                  setFilter({...filter, type: "debit"})
+                  setFilter({ ...filter, type: "debit" });
                   setModalVisible(false);
                 }}
               >
@@ -356,7 +370,7 @@ const Ledger = () => {
                     marginRight: 10,
                   }}
                 ></View>
-                <ThemedText>{i18n.t('by_debit')}</ThemedText>
+                <ThemedText>{i18n.t("by_debit")}</ThemedText>
               </TouchableOpacity>
             </View>
           </View>
@@ -412,5 +426,5 @@ const styles = StyleSheet.create({
     width: 20,
     borderRadius: 50,
     borderWidth: 1,
-  }
+  },
 });

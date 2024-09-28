@@ -40,7 +40,7 @@ const ProductDetail = ({ navigation, route }) => {
   const getProductDetail = async (id) => {
     try {
       showLoader();
-      const productDoc = await axios.get(`${PRODUCTDETAIL}/${id}`);
+      const productDoc = await axios.get(`${PRODUCTDETAIL}/${id}?lang_code=${i18n.locale}`);
       setProductDetail(productDoc?.data?.payload?.result?.product);
       setSelectedOffer(productDoc?.data?.payload?.result?.product?.offers?.[0]?._id)
       hideLoader();
@@ -53,11 +53,13 @@ const ProductDetail = ({ navigation, route }) => {
   const cartData = cartItem.find((f) => f._id === pid);
 
   useEffect(() => {
-    console.log(pid);
     if (pid) {
       getProductDetail(pid);
     }
-  }, [pid]);
+    navigation.setOptions({
+      title: i18n.t('product_detail'),
+    });
+  }, [pid, i18n.locale]);
 
   return (
     <>

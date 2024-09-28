@@ -92,5 +92,6 @@
     "brand": "Brands",
     "order_date": "Order Date",
     "order": "Order",
-    "order_amount": "Order Amount"
+    "order_amount": "Order Amount",
+    "product_not_found": "Product Not Found"
 }

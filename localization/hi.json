@@ -92,5 +92,6 @@
   "brand": "ब्रांड्स",
   "order_date": "आर्डर की तारीख",
   "order": "आदेश",
-  "order_amount": "आदेश राशि"
+  "order_amount": "आदेश राशि",
+  "product_not_found": "उत्पाद नहीं मिला"
 }

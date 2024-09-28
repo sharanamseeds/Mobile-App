@@ -50,7 +50,7 @@ const MyCart = ({ navigation }) => {
         );
       }
       const productParams = JSON.stringify({ products: Product });
-      const result = await axios.post(`${CALCULATEBILL}?payload=${productParams}`);
+      const result = await axios.post(`${CALCULATEBILL}?payload=${productParams}&lang_code=${i18n.locale}`);
       if (result?.data?.payload?.result) {
         setBillingAmount(result?.data?.payload?.result);
       }
@@ -73,7 +73,7 @@ const MyCart = ({ navigation }) => {
         );
       }
       const productParams = JSON.stringify({ products: Product });
-      const result = await axios.post(`${ORDER}?payload=${productParams}`);
+      const result = await axios.post(`${ORDER}?payload=${productParams}&lang_code=${i18n.locale}`);
       if (result?.data) {
         setOrderSuccess(true);
         setTimeout(() => {

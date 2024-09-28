@@ -28,7 +28,7 @@ const User = ({ navigation }) => {
       ? JSON.parse(await AsyncStorage.getItem("user_data"))
       : {};
     try {
-      const response = await axios.get(`${UPDATEUSER}/${userData?._id}`);
+      const response = await axios.get(`${UPDATEUSER}/${userData?._id}?lang_code=${i18n.locale}`);
       setUserDetail(response.data?.payload?.result);
     } catch (error) {
       console.log(error, "error");
@@ -73,7 +73,7 @@ const User = ({ navigation }) => {
         type: `image/${fileType}`, // Mime type (like 'image/jpeg', 'image/png')
       });
 
-      const response = await axios.put(`${UPDATEUSER}/${userDetail?._id}`, formData);
+      const response = await axios.put(`${UPDATEUSER}/${userDetail?._id}?lang_code=${i18n.locale}`, formData);
       if (response.data) {
         ShowSuccessToast(response.data?.message);
       }
@@ -85,7 +85,10 @@ const User = ({ navigation }) => {
 
   useEffect(() => {
     getUserDetail();
-  }, []);
+    navigation.setOptions({
+      title: i18n.t('profile'),
+    });
+  }, [i18n.locale]);
 
   return (
     <ThemeSafeAreaView>

@@ -156,6 +156,7 @@ const MyOrder = ({ navigation }) => {
         status: filter?.status,
         order_type: filter?.order_type,
         page: reset ? 1 : page,
+        lang_code: i18n.locale
       };
 
       const response = await axios.get(ORDERLIST, { params });
@@ -168,7 +169,9 @@ const MyOrder = ({ navigation }) => {
       } else {
         setHasMore(false);
       }
-      hideLoader();
+     setTimeout(() => {
+        hideLoader();
+      }, 2000);
     } catch (error) {
       console.error(error);
       hideLoader();
@@ -182,7 +185,10 @@ const MyOrder = ({ navigation }) => {
     setHasMore(true);
     setPage(1);
     orderList(true);
-  }, [filter]);
+    navigation.setOptions({
+      title: i18n.t('order'),
+    });
+  }, [filter, i18n.locale]);
 
   return (
     <ThemeSafeAreaViewWOS style={{ paddingHorizontal: 15 }}>

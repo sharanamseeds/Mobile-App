@@ -28,7 +28,7 @@ const ProfileEdit = () => {
       ? JSON.parse(await AsyncStorage.getItem("user_data"))
       : {};
     try {
-      const response = await axios.get(`${UPDATEUSER}/${userData?._id}`);
+      const response = await axios.get(`${UPDATEUSER}/${userData?._id}?lang_code=${i18n.locale}`);
       const resultData = response.data?.payload?.result;
       setFormDetail({
         ...resultData,
@@ -194,7 +194,7 @@ const ProfileEdit = () => {
           },
         };
         const response = await axios.put(
-          `${UPDATEUSER}/${userData?._id}?payload=${JSON.stringify(params)}`
+          `${UPDATEUSER}/${userData?._id}?payload=${JSON.stringify(params)}&lang_code=${i18n.locale}`
         );
         if (response.data) {
           ShowSuccessToast(response?.data?.message);

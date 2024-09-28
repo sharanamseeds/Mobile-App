@@ -14,6 +14,7 @@ import {
   Modal,
   ActivityIndicator,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { ThemedText } from "../../components/ThemedText";
 import ThemeSafeAreaViewWOS from "../../components/ThemeSafeAreaViewWOS";
@@ -25,7 +26,6 @@ import { BRANDLIST, CATEGORYLIST, PRODUCTLIST } from "../../constant/ApiRoutes";
 import { GetServerImage } from "../../helper/helper";
 import debounce from "lodash/debounce";
 import { AuthContext } from "../../context/authContext";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n from "../../i18n";
 
 const Product = ({ navigation, route }) => {
@@ -45,6 +45,7 @@ const Product = ({ navigation, route }) => {
   const dispatch = useDispatch();
   const { cartItem } = useSelector((state) => state?.cartItem);
   const { loading, showLoader, hideLoader } = useContext(AuthContext);
+  const screenHeight = Dimensions.get("window").height;
   // theme color
   const textColor = useThemeColor({}, "text");
   const primaryColor = useThemeColor({}, "primary");
@@ -61,13 +62,13 @@ const Product = ({ navigation, route }) => {
   };
 
   const checkOutOfStock = (totalQty, itemId) => {
-    let itemQty = checkItemInCart(itemId)?.qty ? checkItemInCart(itemId)?.qty : 1
+    let itemQty = checkItemInCart(itemId)?.qty ? checkItemInCart(itemId)?.qty : 1;
     if (totalQty === itemQty) {
-      return true
+      return true;
     } else {
-      return false
+      return false;
     }
-  }
+  };
 
   const renderCategory = ({ item, index }) => {
     return (
@@ -163,7 +164,7 @@ const Product = ({ navigation, route }) => {
                         fontFamily: "Poppins",
                       }}
                     >
-                      {i18n.t('add')}
+                      {i18n.t("add")}
                     </Text>
                   </TouchableOpacity>
                 ) : (
@@ -208,7 +209,7 @@ const Product = ({ navigation, route }) => {
                 )}
               </View>
             ) : (
-              <Text style={{ color: "#FF3838" }}>{i18n.t('out_of_stock')}</Text>
+              <Text style={{ color: "#FF3838" }}>{i18n.t("out_of_stock")}</Text>
             )}
           </View>
         </View>
@@ -252,7 +253,8 @@ const Product = ({ navigation, route }) => {
         brand_id: filters?.brand_id === "all" ? "" : filters?.brand_id,
         category_id: filters?.category_id === "all" ? "" : filters?.category_id,
         search: searchTerm,
-        page: reset ? 1 : page
+        page: reset ? 1 : page,
+        lang_code: i18n.locale
       };
 
       const response = await axios.get(PRODUCTLIST, { params });
@@ -265,20 +267,20 @@ const Product = ({ navigation, route }) => {
       } else {
         setHasMore(false);
       }
-      hideLoader();
+      setTimeout(() => {
+        hideLoader();
+      }, 2000);
     } catch (error) {
       console.error(error);
-      hideLoader();
-    } finally {
       hideLoader();
     }
   };
 
   const getCategories = async () => {
     try {
-      const response = await axios.get(CATEGORYLIST);
+      const response = await axios.get(`${CATEGORYLIST}?lang_code=${i18n.locale}`);
       setCategories([
-        { _id: "all", category_name: "All" },
+        { _id: "all", category_name: i18n.t("all") },
         ...response?.data?.payload?.result?.data,
       ]);
     } catch (error) {
@@ -288,8 +290,11 @@ const Product = ({ navigation, route }) => {
 
   const getBrands = async () => {
     try {
-      const response = await axios.get(BRANDLIST);
-      setBrands([{ _id: "all", brand_name: "All" }, ...response?.data?.payload?.result?.data]);
+      const response = await axios.get(`${BRANDLIST}?lang_code=${i18n.locale}`);
+      setBrands([
+        { _id: "all", brand_name: i18n.t("all") },
+        ...response?.data?.payload?.result?.data,
+      ]);
     } catch (error) {
       console.log(error);
     }
@@ -298,14 +303,17 @@ const Product = ({ navigation, route }) => {
   useEffect(() => {
     getCategories();
     getBrands();
-  }, []);
+    navigation.setOptions({
+      title: i18n.t("product"),
+    });
+  }, [i18n.locale]);
 
   useEffect(() => {
     setProduct([]);
     setHasMore(true);
     setPage(1);
     fetchProducts(true);
-  }, [filters]);
+  }, [filters, i18n.locale]);
 
   return (
     <>
@@ -318,7 +326,7 @@ const Product = ({ navigation, route }) => {
           }}
         >
           <SearchBar
-            placeholder={i18n.t('type_here')}
+            placeholder={i18n.t("type_here")}
             round={true}
             containerStyle={{
               backgroundColor: background,
@@ -383,19 +391,38 @@ const Product = ({ navigation, route }) => {
           </ThemedView>
         )}
         {refreshing ? <ActivityIndicator size="large" color={primaryColor} /> : ""}
-        <FlatList
-          data={product}
-          keyExtractor={(item) => item?._id}
-          renderItem={renderProduct}
-          showsVerticalScrollIndicator={false}
-          //ListFooterComponent={renderFooter}
-          onEndReached={() => fetchProducts()}
-          onEndReachedThreshold={0.5}
-          initialNumToRender={10}
-          maxToRenderPerBatch={5}
-          windowSize={10}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchProducts} />}
-        />
+        {product?.length > 0 ? (
+          <FlatList
+            data={product}
+            keyExtractor={(item) => item?._id}
+            renderItem={renderProduct}
+            showsVerticalScrollIndicator={false}
+            //ListFooterComponent={renderFooter}
+            onEndReached={() => product?.length > 4 && fetchProducts()}
+            onEndReachedThreshold={0.5}
+            initialNumToRender={10}
+            maxToRenderPerBatch={5}
+            windowSize={10}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchProducts} />}
+          />
+        ) : (
+          <View
+            style={{
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              height: screenHeight - 250,
+            }}
+          >
+            <Image
+              source={require("../../assets/images/shopping-bag_5006896.png")}
+              style={{ width: 100, height: 100 }}
+            />
+            <ThemedText type="title" style={{ fontSize: 22 }}>
+              {i18n.t("product_not_found")}
+            </ThemedText>
+          </View>
+        )}
       </ThemeSafeAreaViewWOS>
       <Modal
         animationType="slide"
@@ -415,7 +442,9 @@ const Product = ({ navigation, route }) => {
             }}
           >
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={{ color: textColor, fontSize: 20, fontWeight: 600 }}>{i18n.t('filters')}</Text>
+              <Text style={{ color: textColor, fontSize: 20, fontWeight: 600 }}>
+                {i18n.t("filters")}
+              </Text>
               <Feather
                 name="x"
                 size={22}
@@ -443,7 +472,7 @@ const Product = ({ navigation, route }) => {
                     marginBottom: 15,
                   }}
                 ></View>
-                <ThemedText>{i18n.t('by_category')}</ThemedText>
+                <ThemedText>{i18n.t("by_category")}</ThemedText>
               </TouchableOpacity>
               <TouchableOpacity
                 style={{ flexDirection: "row" }}
@@ -462,7 +491,7 @@ const Product = ({ navigation, route }) => {
                     marginRight: 10,
                   }}
                 ></View>
-                <ThemedText>{i18n.t('by_brand')}</ThemedText>
+                <ThemedText>{i18n.t("by_brand")}</ThemedText>
               </TouchableOpacity>
             </View>
           </View>

@@ -19,6 +19,7 @@ const Home = ({ navigation }) => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [CarouselData, setCarouselData] = useState([]);
+  const [bannerData, setBannerData] = useState([])
   const [featureProduct, setFeatureProduct] = useState([]);
   const { showLoader, hideLoader } = useContext(AuthContext);
 
@@ -100,7 +101,7 @@ const Home = ({ navigation }) => {
   const getCategories = async () => {
     try {
       showLoader();
-      const response = await axios.get(CATEGORYLIST);
+      const response = await axios.get(`${CATEGORYLIST}?lang_code=${i18n.locale}`);
       setCategories(response?.data?.payload?.result?.data);
     } catch (error) {
       console.log(error);
@@ -111,7 +112,7 @@ const Home = ({ navigation }) => {
   const getBrands = async () => {
     try {
       showLoader();
-      const response = await axios.get(BRANDLIST);
+      const response = await axios.get(`${BRANDLIST}?lang_code=${i18n.locale}`);
       setBrands(response?.data?.payload?.result?.data);
     } catch (error) {
       hideLoader();
@@ -122,8 +123,9 @@ const Home = ({ navigation }) => {
   const getBanner = async () => {
     try {
       showLoader();
-      const response = await axios.get(BANNER);
+      const response = await axios.get(`${BANNER}?lang_code=${i18n.locale}`);
       setCarouselData(response.data?.payload?.result?.images);
+      setBannerData(response.data?.payload?.result?.banners)
     } catch (error) {
       hideLoader();
       console.log(error);
@@ -133,9 +135,11 @@ const Home = ({ navigation }) => {
   const getFeatureProduct = async () => {
     try {
       showLoader();
-      const response = await axios.get(`${PRODUCTLIST}?is_featured=true`);
+      const response = await axios.get(`${PRODUCTLIST}?is_featured=true&lang_code=${i18n.locale}`);
       setFeatureProduct(response.data?.payload?.result?.data);
-      hideLoader();
+      setTimeout(() => {
+        hideLoader();
+      }, 2000);
     } catch (error) {
       hideLoader();
       console.log(error);
@@ -145,12 +149,12 @@ const Home = ({ navigation }) => {
   useEffect(() => {
     getCategories();
     getBrands();
-  }, [i18n.locale]);
-
-  useEffect(() => {
-    getBanner();
     getFeatureProduct();
-  }, []);
+    getBanner();
+    navigation.setOptions({
+      title: i18n.t('home'),
+    });
+  }, [i18n.locale]);
 
   return (
     <>
@@ -256,14 +260,36 @@ const Home = ({ navigation }) => {
             </View>
           </ThemedView>
         )}
-        <ThemedView style={{ paddingHorizontal: 20, marginBottom: 20 }}>
-          <Image
-            source={{
-              uri: "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/gymonesl8f2t7tq4zmtc.png",
-            }}
-            style={{ borderRadius: 20, resizeMode: "cover", width: "100%", height: 350 }}
-          />
-        </ThemedView>
+        {bannerData?.length > 0 && (
+          <ThemedView>
+            <Carousel
+              loop
+              mode="parallax"
+              width={width}
+              height={350}
+              autoPlay={true}
+              data={bannerData}
+              autoPlayInterval={5000}
+              scrollAnimationDuration={1000}
+              renderItem={({ item, index }) => (
+                <ThemedView
+                  style={{
+                    flex: 1,
+                    marginHorizontal: 4,
+                    borderRadius: 20,
+                    justifyContent: "center",
+                  }}
+                  key={index}
+                >
+                  <Image
+                    source={{ uri: GetServerImage(item) }}
+                    style={{ width: "100%", height: 350, borderRadius: 20 }}
+                  />
+                </ThemedView>
+              )}
+            />
+          </ThemedView>
+        )}
       </ThemeSafeAreaView>
       <CartItemTotal navigation={navigation} />
     </>

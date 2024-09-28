@@ -14,6 +14,7 @@ import { BRANDLIST, CATEGORYLIST, PRODUCTLIST } from "../../constant/ApiRoutes";
 import { GetServerImage } from "../../helper/helper";
 import debounce from "lodash/debounce";
 import { AuthContext } from "../../context/authContext";
+import i18n from "../../i18n";
 
 const ProductFilter = ({ navigation, route }) => {
   const params = route.params;
@@ -218,6 +219,7 @@ const ProductFilter = ({ navigation, route }) => {
         category_id: filters?.category_id === "all" ? "" : filters?.category_id,
         search: searchTerm,
         page: reset ? 1 : page,
+        lang_code: i18n.locale
       };
 
       const response = await axios.get(PRODUCTLIST, { params: apiParams });
@@ -239,9 +241,9 @@ const ProductFilter = ({ navigation, route }) => {
 
   const getCategories = async () => {
     try {
-      const response = await axios.get(CATEGORYLIST);
+      const response = await axios.get(`${CATEGORYLIST}?lang_code=${i18n.locale}`);
       setCategories([
-        { _id: "all", category_name: "All" },
+        { _id: "all", category_name: i18n.t('all') },
         ...response?.data?.payload?.result?.data,
       ]);
     } catch (error) {
@@ -251,8 +253,8 @@ const ProductFilter = ({ navigation, route }) => {
 
   const getBrands = async () => {
     try {
-      const response = await axios.get(BRANDLIST);
-      setBrands([{ _id: "all", brand_name: "All" }, ...response?.data?.payload?.result?.data]);
+      const response = await axios.get(`${BRANDLIST}?lang_code=${i18n.locale}`);
+      setBrands([{ _id: "all", brand_name: i18n.t('all') }, ...response?.data?.payload?.result?.data]);
     } catch (error) {
       console.log(error);
     }
@@ -287,7 +289,7 @@ const ProductFilter = ({ navigation, route }) => {
           }}
         >
           <SearchBar
-            placeholder="Type Here..."
+            placeholder={i18n.t("type_here")}
             round={true}
             containerStyle={{
               backgroundColor: background,

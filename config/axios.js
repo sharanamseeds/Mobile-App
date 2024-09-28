@@ -24,9 +24,6 @@ const refreshToken = async () => {
 
 axios.interceptors.request.use(
   async function (response) {
-    axios.defaults.params={
-      lang_code: i18n.locale || 'en' 
-    }
     if (response) {
       if (response.data?.payload && res.data.payload?.result?.token) {
         // append your request headers with an authenticated token

@@ -84,7 +84,7 @@ const OrderDetail = ({ navigation, route }) => {
   const getOrderDetail = async (id) => {
     try {
       showLoader();
-      const productDoc = await axios.get(`${ORDERDETAIL}/${id}`);
+      const productDoc = await axios.get(`${ORDERDETAIL}/${id}?lang_code=${i18n.locale}`);
       setOrderDetail(productDoc?.data?.payload?.result);
       hideLoader();
     } catch (error) {
@@ -96,7 +96,7 @@ const OrderDetail = ({ navigation, route }) => {
   const downloadBill = async (id) => {
     try {
       showLoader();
-      const result = await axios.get(`${DOWNLOADBILL}/${id}`);
+      const result = await axios.get(`${DOWNLOADBILL}/${id}?lang_code=${i18n.locale}`);
       createAndDownloadPdf(result?.data);
     } catch (error) {
       console.log(error);
@@ -132,7 +132,7 @@ const OrderDetail = ({ navigation, route }) => {
     try {
       showLoader();
       const result = await axios.post(
-        `${RETURNORDER}/${order_id}?payload=${JSON.stringify({ reason: "return" })}`
+        `${RETURNORDER}/${order_id}?payload=${JSON.stringify({ reason: "return" })}&lang_code=${i18n.locale}`
       );
       ShowSuccessToast(result?.data?.message);
       hideLoader();

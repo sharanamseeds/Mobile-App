@@ -100,7 +100,7 @@ const Login = ({ navigation }) => {
           {i18n.t("welcome")},
         </ThemedText>
         <ThemedText style={{ ...styles.subtitle, color: subTitleColor }}>
-         {i18n.t("discover")},
+         {i18n.t("discover")}
         </ThemedText>
 
         <FloatingInput
