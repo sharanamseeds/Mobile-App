@@ -95,21 +95,16 @@ const MyAccount = ({ navigation }) => {
       <ThemedView style={{ marginTop: 20 }}>
         <View style={styles.imageBox}>
           <View style={{ position: "relative" }}>
-            {userDetail?.profile ? (
-              <Image
-                style={styles.image}
-                source={{uri: GetServerImage(userDetail?.profile)}}
-                width={100}
-                height={100}
-              />
-            ) : (
-              <Image
-                style={{...styles.image, width: 100, height: 100}}
-                source={require("../../assets/images/profile.png")}
-                width={100}
-                height={100}
-              />
-            )}
+            <Image
+              style={styles.image}
+              source={{
+                uri: userDetail?.profile
+                  ? GetServerImage(userDetail?.profile)
+                  : "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/nzxf1mgeqfrulryziwln.png",
+              }}
+              width={100}
+              height={100}
+            />
 
             <TouchableOpacity
               style={{ position: "absolute", bottom: 0, right: 0 }}
@@ -126,7 +121,9 @@ const MyAccount = ({ navigation }) => {
         </View>
         <View style={{ marginTop: 30 }}>
           <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-            <ThemedText style={{ fontSize: 22, fontWeight: 600 }}>{i18n.t('personal_detail')}</ThemedText>
+            <ThemedText style={{ fontSize: 22, fontWeight: 600 }}>
+              {i18n.t("personal_detail")}
+            </ThemedText>
             <TouchableOpacity
               style={{ flexDirection: "row" }}
               onPress={() => navigation.navigate("EditProfile")}
@@ -137,22 +134,32 @@ const MyAccount = ({ navigation }) => {
                 size={22}
                 color={primaryColor}
               />
-              <ThemedText style={{ color: primaryColor, marginLeft: 5 }}>{i18n.t('edit_profile')}</ThemedText>
+              <ThemedText style={{ color: primaryColor, marginLeft: 5 }}>
+                {i18n.t("edit_profile")}
+              </ThemedText>
             </TouchableOpacity>
           </View>
-          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t('full_name')}</ThemedText>
+          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t("full_name")}</ThemedText>
           <ThemedText>{userDetail?.name}</ThemedText>
-          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t('firm_name')}</ThemedText>
+          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t("firm_name")}</ThemedText>
           <ThemedText>{userDetail?.agro_name}</ThemedText>
-          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t('phone')}</ThemedText>
+          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t("phone")}</ThemedText>
           <ThemedText>{userDetail?.contact_number}</ThemedText>
-          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t('email')}</ThemedText>
+          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t("email")}</ThemedText>
           <ThemedText>{userDetail?.email}</ThemedText>
-          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t('gst')}</ThemedText>
+          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t("gst")}</ThemedText>
           <ThemedText>{userDetail?.gst_number}</ThemedText>
-          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t('billing_address')}</ThemedText>
-          <ThemedText>{`${userDetail?.billing_address?.address_line || ""} ${userDetail?.billing_address?.city || ""} ${userDetail?.billing_address?.state || ""} ${userDetail?.billing_address?.pincode || ""}`}</ThemedText>
-          <ThemedText style={{ color: "gray", marginTop: 12 }}>{i18n.t('shipping_address')}</ThemedText>
+          <ThemedText style={{ color: "gray", marginTop: 12 }}>
+            {i18n.t("billing_address")}
+          </ThemedText>
+          <ThemedText>{`${userDetail?.billing_address?.address_line || ""} ${
+            userDetail?.billing_address?.city || ""
+          } ${userDetail?.billing_address?.state || ""} ${
+            userDetail?.billing_address?.pincode || ""
+          }`}</ThemedText>
+          <ThemedText style={{ color: "gray", marginTop: 12 }}>
+            {i18n.t("shipping_address")}
+          </ThemedText>
           <ThemedText>{`${userDetail?.shipping_address?.address_line || ""} ${
             userDetail?.shipping_address?.city || ""
           } ${userDetail?.shipping_address?.state || ""} ${
@@ -161,7 +168,7 @@ const MyAccount = ({ navigation }) => {
         </View>
         <View style={{ marginTop: 30 }}>
           <ThemedText style={{ fontSize: 22, fontWeight: 600, marginBottom: 20 }}>
-            {i18n.t('document_pending')}
+            {i18n.t("document_pending")}
           </ThemedText>
           {!userDetail?.aadhar_card && (
             <TouchableOpacity
@@ -175,7 +182,7 @@ const MyAccount = ({ navigation }) => {
               }}
               onPress={() => uploadImage("aadhar_card")}
             >
-              <ThemedText>{i18n.t('address_proof')}</ThemedText>
+              <ThemedText>{i18n.t("address_proof")}</ThemedText>
               <View
                 style={{
                   backgroundColor: "rgba(233, 70, 44, 0.75)",
@@ -201,7 +208,7 @@ const MyAccount = ({ navigation }) => {
               }}
               onPress={() => uploadImage("other_document")}
             >
-              <ThemedText>{i18n.t('pan')}</ThemedText>
+              <ThemedText>{i18n.t("pan")}</ThemedText>
               <View
                 style={{
                   backgroundColor: "rgba(233, 70, 44, 0.75)",
@@ -227,7 +234,7 @@ const MyAccount = ({ navigation }) => {
               }}
               onPress={() => uploadImage("bank_details")}
             >
-              <ThemedText>{i18n.t('passbook')}</ThemedText>
+              <ThemedText>{i18n.t("passbook")}</ThemedText>
               <View
                 style={{
                   backgroundColor: "rgba(233, 70, 44, 0.75)",

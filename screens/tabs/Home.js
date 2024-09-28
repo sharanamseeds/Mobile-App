@@ -102,7 +102,6 @@ const Home = ({ navigation }) => {
       showLoader();
       const response = await axios.get(CATEGORYLIST);
       setCategories(response?.data?.payload?.result?.data);
-      hideLoader();
     } catch (error) {
       console.log(error);
       hideLoader();
@@ -114,7 +113,6 @@ const Home = ({ navigation }) => {
       showLoader();
       const response = await axios.get(BRANDLIST);
       setBrands(response?.data?.payload?.result?.data);
-      hideLoader();
     } catch (error) {
       hideLoader();
       console.log(error);
@@ -126,7 +124,6 @@ const Home = ({ navigation }) => {
       showLoader();
       const response = await axios.get(BANNER);
       setCarouselData(response.data?.payload?.result?.images);
-      hideLoader();
     } catch (error) {
       hideLoader();
       console.log(error);

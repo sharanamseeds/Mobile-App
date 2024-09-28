@@ -1,4 +1,12 @@
-import { Text, View, Image, StyleSheet, TouchableOpacity, useWindowDimensions, Alert } from "react-native";
+import {
+  Text,
+  View,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  useWindowDimensions,
+  Alert,
+} from "react-native";
 import ThemeSafeAreaView from "../../components/ThemeSafeAreaView";
 import { ThemedView } from "../../components/ThemedView";
 import { useThemeColor } from "../../hook/useThemeColor";
@@ -11,16 +19,16 @@ import { GetServerImage, ShowErrorToast, ShowSuccessToast } from "../../helper/h
 import { AuthContext } from "../../context/authContext";
 import moment from "moment";
 import i18n from "../../i18n";
-import * as Print from 'expo-print';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
+import * as Print from "expo-print";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 
 const OrderDetail = ({ navigation, route }) => {
   // theme color
   const boxColor = useThemeColor({}, "boxColor");
   const boxShadow = useThemeColor({}, "boxShadow");
   const primaryColor = useThemeColor({}, "primary");
-  const secondaryColor = useThemeColor({}, "secondary")
+  const secondaryColor = useThemeColor({}, "secondary");
   const { pid } = route.params;
   const [orderDetail, setOrderDetail] = useState([]);
   const { showLoader, hideLoader } = useContext(AuthContext);
@@ -100,7 +108,7 @@ const OrderDetail = ({ navigation, route }) => {
     try {
       // Generate the PDF
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
-      console.log(uri)
+      console.log(uri);
       // Define the file path where you want to save the PDF
       const fileName = `${FileSystem.documentDirectory}${orderDetail?._id}.pdf`;
 
@@ -120,17 +128,19 @@ const OrderDetail = ({ navigation, route }) => {
     }
   };
 
-  const returnOrder = async(order_id) => {
+  const returnOrder = async (order_id) => {
     try {
-      showLoader()
-      const result = await axios.post(`${RETURNORDER}/${order_id}?payload=${JSON.stringify({reason: 'return'})}`)
-      ShowSuccessToast(result?.data?.message)
-      hideLoader()
-    } catch(error) {
-      ShowErrorToast(error.response?.data?.message)
-      hideLoader()
+      showLoader();
+      const result = await axios.post(
+        `${RETURNORDER}/${order_id}?payload=${JSON.stringify({ reason: "return" })}`
+      );
+      ShowSuccessToast(result?.data?.message);
+      hideLoader();
+    } catch (error) {
+      ShowErrorToast(error.response?.data?.message);
+      hideLoader();
     }
-  }
+  };
 
   useEffect(() => {
     console.log(pid);
@@ -166,29 +176,6 @@ const OrderDetail = ({ navigation, route }) => {
             <ThemedText style={{ fontSize: 17 }}>{i18n.t("order_amount")} :</ThemedText>
             <ThemedText style={{ fontSize: 16, fontWeight: 600, marginLeft: 10 }}>
               ₹ {orderDetail?.billing_amount?.toFixed(2)}
-            </ThemedText>
-          </View>
-        </ThemedView>
-        <ThemedView
-          style={{
-            paddingHorizontal: 15,
-            borderTopColor: "grey",
-            borderTopWidth: 2,
-            paddingTop: 15,
-            borderBottomColor: "grey",
-            borderBottomWidth: 2,
-            paddingBottom: 15,
-            marginTop: 1,
-            marginBottom: 1,
-          }}
-        >
-          <ThemedText style={{ fontSize: 18, marginBottom: 15 }}>
-            {i18n.t("order_status_detail")}
-          </ThemedText>
-          <View style={{ flexDirection: "row", alignItems: "center" }}>
-            <ThemedText style={{ fontSize: 17 }}>{i18n.t("order_type")} :</ThemedText>
-            <ThemedText style={{ fontSize: 16, fontWeight: 600, marginLeft: 10 }}>
-              {orderDetail?.order_type?.toUpperCase()}
             </ThemedText>
           </View>
           <View style={{ flexDirection: "row", alignItems: "center" }}>

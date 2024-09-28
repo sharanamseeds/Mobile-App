@@ -175,7 +175,6 @@ const MyCart = ({ navigation }) => {
                           </TouchableOpacity>
                         </View>
                       </View>
-                      {item?.quantity === item?.qty && <Text style={{ color: "#FF3838" }}>Out Of Stock</Text>}
                       <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
                         <ThemedText style={{ color: "gray", fontSize: 12 }}>{i18n.t('item_total')}:</ThemedText>
                         <ThemedText style={{ fontSize: 12, marginLeft: 5 }}>

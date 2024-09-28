@@ -128,7 +128,6 @@ const ProductDetail = ({ navigation, route }) => {
                 @{productDetail?.price}
               </ThemedText>
             </View>
-            {cartData?.quantity === cartData?.qty && <Text style={{ color: "#FF3838" }}>Out Of Stock</Text>}
             {productDetail?.in_stock ? !cartData ? (
               <TouchableOpacity
                 style={{

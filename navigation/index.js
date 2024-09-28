@@ -173,6 +173,7 @@ const TabNav = ({ navigation }) => {
           name="HomeStack"
           options={{
             headerTitle: (props) => <CustomHeader {...props} />,
+            unmountOnBlur: true
           }}
           component={Home}
         />
@@ -181,6 +182,7 @@ const TabNav = ({ navigation }) => {
           component={Product}
           options={{
             headerTitle: (props) => <CustomTitle {...props} title={i18n.t("product")} />,
+            unmountOnBlur: true,
             headerTitleAlign: "center",
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
@@ -200,6 +202,7 @@ const TabNav = ({ navigation }) => {
           options={{
             headerTitle: (props) => <CustomTitle {...props} title={i18n.t("order")} />,
             headerTitleAlign: "center",
+            unmountOnBlur: true,
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Feather
@@ -218,6 +221,7 @@ const TabNav = ({ navigation }) => {
           options={{
             headerTitle: (props) => <CustomTitle {...props} title={i18n.t("ladger")} />,
             headerTitleAlign: "center",
+            unmountOnBlur: true,
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Feather
@@ -236,6 +240,7 @@ const TabNav = ({ navigation }) => {
           options={{
             headerTitle: (props) => <CustomTitle {...props} title={i18n.t("profile")} />,
             headerTitleAlign: "center",
+            unmountOnBlur: true,
             headerLeft: () => (
               <TouchableOpacity onPress={() => navigation.goBack()}>
                 <Feather

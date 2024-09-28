@@ -78,7 +78,7 @@ const User = ({ navigation }) => {
         ShowSuccessToast(response.data?.message);
       }
     } catch (error) {
-      console.log(error?.response?.data?.message)
+      console.log(error?.response?.data?.message);
       console.log(error, "error");
     }
   };
@@ -92,23 +92,14 @@ const User = ({ navigation }) => {
       <ThemedView>
         <View style={styles.imageBox}>
           <View style={{ position: "relative" }}>
-            {image || userDetail?.profile ? (
-              <Image
-                style={styles.image}
-                source={{
-                  uri: image ? image : GetServerImage(userDetail?.profile),
-                }}
-                width={100}
-                height={100}
-              />
-            ) : (
-              <Image
-                style={{ ...styles.image, width: 100, height: 100 }}
-                source={require("../../assets/images/profile.png")}
-                width={100}
-                height={100}
-              />
-            )}
+            <Image
+              style={styles.image}
+              source={{
+                uri: image ? image : userDetail?.profile ? GetServerImage(userDetail?.profile) : "https://res.cloudinary.com/dztl85wyk/image/upload/v1717309940/my-folder/nzxf1mgeqfrulryziwln.png",
+              }}
+              width={100}
+              height={100}
+            />
             <TouchableOpacity
               style={{ position: "absolute", bottom: 0, right: 0 }}
               onPress={() => uploadImage()}
@@ -150,8 +141,10 @@ const User = ({ navigation }) => {
                 <Feather name="user" color={textColor} size={24} />
               </View>
               <View>
-                <ThemedText style={{ fontSize: 18 }}>{i18n.t('my_account')}</ThemedText>
-                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>{i18n.t('active_user')}</Text>
+                <ThemedText style={{ fontSize: 18 }}>{i18n.t("my_account")}</ThemedText>
+                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>
+                  {i18n.t("active_user")}
+                </Text>
               </View>
             </View>
             <Feather name="chevron-right" size={25} color={"gray"} />
@@ -167,8 +160,10 @@ const User = ({ navigation }) => {
                 <Feather name="shopping-cart" color={textColor} size={24} />
               </View>
               <View>
-                <ThemedText style={{ fontSize: 18 }}>{i18n.t('my_cart')}</ThemedText>
-                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>{i18n.t('item_in_cart')}</Text>
+                <ThemedText style={{ fontSize: 18 }}>{i18n.t("my_cart")}</ThemedText>
+                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>
+                  {i18n.t("item_in_cart")}
+                </Text>
               </View>
             </View>
             <Feather name="chevron-right" size={25} color={"gray"} />
@@ -184,8 +179,8 @@ const User = ({ navigation }) => {
                 <Feather name="archive" color={textColor} size={24} />
               </View>
               <View>
-                <ThemedText style={{ fontSize: 18 }}>{i18n.t('my_order')}</ThemedText>
-                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>{i18n.t('orders')}</Text>
+                <ThemedText style={{ fontSize: 18 }}>{i18n.t("my_order")}</ThemedText>
+                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>{i18n.t("orders")}</Text>
               </View>
             </View>
             <Feather name="chevron-right" size={25} color={"gray"} />
@@ -201,8 +196,10 @@ const User = ({ navigation }) => {
                 <Feather name="key" color={textColor} size={24} />
               </View>
               <View>
-                <ThemedText style={{ fontSize: 18 }}>{i18n.t('change_password')}</ThemedText>
-                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>{i18n.t('update_password')}</Text>
+                <ThemedText style={{ fontSize: 18 }}>{i18n.t("change_password")}</ThemedText>
+                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>
+                  {i18n.t("update_password")}
+                </Text>
               </View>
             </View>
             <Feather name="chevron-right" size={25} color={"gray"} />
@@ -213,8 +210,10 @@ const User = ({ navigation }) => {
                 <Feather name="log-out" color={textColor} size={24} />
               </View>
               <View>
-                <ThemedText style={{ fontSize: 18 }}>{i18n.t('logout')}</ThemedText>
-                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>{i18n.t('logout_from_app')}</Text>
+                <ThemedText style={{ fontSize: 18 }}>{i18n.t("logout")}</ThemedText>
+                <Text style={{ ...styles.price, fontFamily: "Poppins" }}>
+                  {i18n.t("logout_from_app")}
+                </Text>
               </View>
             </View>
             <Feather name="chevron-right" size={25} color={"gray"} />

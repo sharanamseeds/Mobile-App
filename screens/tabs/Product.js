@@ -138,7 +138,6 @@ const Product = ({ navigation, route }) => {
                 <ThemedText style={{ ...styles.title }}>₹ {item?.price}</ThemedText>
               </TouchableOpacity>
             </View>
-            {checkOutOfStock(item?.quantity, item?._id) && <Text style={{ color: "#FF3838" }}>Out Of Stock</Text>}
             {item?.in_stock ? (
               <View style={styles.cardButton}>
                 {!checkItemInCart(item?._id) ? (
