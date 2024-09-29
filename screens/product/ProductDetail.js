@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   Modal,
+  Dimensions,
 } from "react-native";
 import ThemeSafeAreaView from "../../components/ThemeSafeAreaView";
 import { ThemedView } from "../../components/ThemedView";
@@ -22,10 +23,12 @@ import HTMLView from "react-native-htmlview";
 import { GetServerImage } from "../../helper/helper";
 import { AuthContext } from "../../context/authContext";
 import i18n from "../../i18n";
+import Carousel from "react-native-reanimated-carousel";
 
 const ProductDetail = ({ navigation, route }) => {
   // theme color
   const { pid } = route.params;
+  const width = Dimensions.get("window").width;
   const { cartItem } = useSelector((state) => state?.cartItem);
   const dispatch = useDispatch();
   const [productDetail, setProductDetail] = useState([]);
@@ -42,7 +45,7 @@ const ProductDetail = ({ navigation, route }) => {
       showLoader();
       const productDoc = await axios.get(`${PRODUCTDETAIL}/${id}?lang_code=${i18n.locale}`);
       setProductDetail(productDoc?.data?.payload?.result?.product);
-      setSelectedOffer(productDoc?.data?.payload?.result?.product?.offers?.[0]?._id)
+      setSelectedOffer(productDoc?.data?.payload?.result?.product?.offers?.[0]?._id);
       hideLoader();
     } catch (error) {
       hideLoader();
@@ -57,7 +60,7 @@ const ProductDetail = ({ navigation, route }) => {
       getProductDetail(pid);
     }
     navigation.setOptions({
-      title: i18n.t('product_detail'),
+      title: i18n.t("product_detail"),
     });
   }, [pid, i18n.locale]);
 
@@ -71,7 +74,7 @@ const ProductDetail = ({ navigation, route }) => {
             paddingBottom: 15,
           }}
         >
-          <View style={styles.imageCard}>
+          {/* <View style={styles.imageCard}>
             <Image
               source={{
                 uri: GetServerImage(productDetail?.images?.[0]),
@@ -79,7 +82,29 @@ const ProductDetail = ({ navigation, route }) => {
               width={125}
               height={130}
             />
-          </View>
+          </View> */}
+          <Carousel
+            loop
+            mode="parallax"
+            width={width}
+            height={180}
+            autoPlay={true}
+            data={productDetail?.images}
+            autoPlayInterval={2000}
+            scrollAnimationDuration={1000}
+            renderItem={({ item, index }) => (
+              <View style={styles.imageCard} key={index}>
+                <Image
+                  style={{borderRadius: 20}}
+                  source={{
+                    uri: GetServerImage(item),
+                  }}
+                  width={155}
+                  height={180}
+                />
+              </View>
+            )}
+          />
           <View style={{ ...styles.companyDetail, paddingHorizontal: 15 }}>
             <ThemedText style={{ ...styles.price, marginTop: -2 }}>
               {productDetail?.product_code}
@@ -109,14 +134,17 @@ const ProductDetail = ({ navigation, route }) => {
                   <ThemedText style={{ marginLeft: 5 }}>
                     {productDetail?.offers?.[0]?.offer_name}
                   </ThemedText>
-                  <ThemedText style={{fontSize: 12, marginLeft: 5, marginTop: -4}}>{productDetail?.offers?.[0]?.offer_code} ({productDetail?.offers?.[0]?.percentage_discount}
-                    {productDetail?.offers?.[0]?.offer_type === "percentage" ? "% off" : "off"})</ThemedText>
+                  <ThemedText style={{ fontSize: 12, marginLeft: 5, marginTop: -4 }}>
+                    {productDetail?.offers?.[0]?.offer_code} (
+                    {productDetail?.offers?.[0]?.percentage_discount}
+                    {productDetail?.offers?.[0]?.offer_type === "percentage" ? "% off" : "off"})
+                  </ThemedText>
                 </View>
               </View>
               <View
                 style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}
               >
-                <ThemedText>View Offer</ThemedText>
+                <ThemedText>{i18n.t("view_offer")}</ThemedText>
                 <Feather name="chevron-right" size={18} color={textColor} />
               </View>
             </TouchableOpacity>
@@ -130,85 +158,95 @@ const ProductDetail = ({ navigation, route }) => {
                 @{productDetail?.price}
               </ThemedText>
             </View>
-            {productDetail?.in_stock ? !cartData ? (
-              <TouchableOpacity
-                style={{
-                  width: "40%",
-                  height: "80%",
-                  backgroundColor: primaryColor,
-                  textAlign: "center",
-                  borderRadius: 10,
-                  marginLeft: 10,
-                  flexDirection: "row",
-                  justifyContent: "center",
-                  alignItems: "center",
-                }}
-                disabled={cartData?.quantity === cartData?.qty}
-                onPress={() => dispatch(ADDCART({ ...productDetail, selectedOffer: selectedOffer, qty: 1 }))}
-              >
-                <Text
+            {productDetail?.in_stock ? (
+              !cartData ? (
+                <TouchableOpacity
                   style={{
+                    width: "40%",
+                    height: "80%",
+                    backgroundColor: primaryColor,
                     textAlign: "center",
-                    color: "#FFF",
-                    fontSize: 14,
-                    fontWeight: 600,
-                    fontFamily: "Poppins",
-                  }}
-                >
-                  {i18n.t('add')}
-                </Text>
-              </TouchableOpacity>
-            ) : (
-              <View style={{ ...styles.cartButtonMain, borderColor: primaryColor }}>
-                <TouchableOpacity
-                  style={{
-                    ...styles.cartButton,
-                    backgroundColor: primaryColor,
-                    borderTopLeftRadius: 10,
-                    borderBottomLeftRadius: 10,
-                    marginLeft: -1,
-                  }}
-                  onPress={() =>
-                    cartData?.qty === 1
-                      ? dispatch(DELITEM(productDetail))
-                      : dispatch(DEC(productDetail))
-                  }
-                >
-                  <Feather
-                    name={cartData?.qty === 1 ? "trash-2" : "minus"}
-                    size={24}
-                    color={"#FFF"}
-                  />
-                </TouchableOpacity>
-                <Text style={{ backgroundColor: "#FFF", fontSize: 20 }}>{cartData?.qty}</Text>
-                <TouchableOpacity
-                  style={{
-                    ...styles.cartButton,
-                    backgroundColor: primaryColor,
-                    borderTopRightRadius: 10,
-                    borderBottomRightRadius: 10,
-                    marginRight: -1,
+                    borderRadius: 10,
+                    marginLeft: 10,
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignItems: "center",
                   }}
                   disabled={cartData?.quantity === cartData?.qty}
-                  onPress={() => dispatch(INC(productDetail))}
+                  onPress={() =>
+                    dispatch(ADDCART({ ...productDetail, selectedOffer: selectedOffer, qty: 1 }))
+                  }
                 >
-                  <Feather name="plus" size={24} color={"#FFF"} />
+                  <Text
+                    style={{
+                      textAlign: "center",
+                      color: "#FFF",
+                      fontSize: 14,
+                      fontWeight: 600,
+                      fontFamily: "Poppins",
+                    }}
+                  >
+                    {i18n.t("add")}
+                  </Text>
                 </TouchableOpacity>
-              </View>
-            ) : <Text style={{color: "#FF3838"}}>{i18n.t('out_of_stock')}</Text>}
+              ) : (
+                <View style={{ ...styles.cartButtonMain, borderColor: primaryColor }}>
+                  <TouchableOpacity
+                    style={{
+                      ...styles.cartButton,
+                      backgroundColor: primaryColor,
+                      borderTopLeftRadius: 10,
+                      borderBottomLeftRadius: 10,
+                      marginLeft: -1,
+                    }}
+                    onPress={() =>
+                      cartData?.qty === 1
+                        ? dispatch(DELITEM(productDetail))
+                        : dispatch(DEC(productDetail))
+                    }
+                  >
+                    <Feather
+                      name={cartData?.qty === 1 ? "trash-2" : "minus"}
+                      size={24}
+                      color={"#FFF"}
+                    />
+                  </TouchableOpacity>
+                  <Text style={{ backgroundColor: "#FFF", fontSize: 20 }}>{cartData?.qty}</Text>
+                  <TouchableOpacity
+                    style={{
+                      ...styles.cartButton,
+                      backgroundColor: primaryColor,
+                      borderTopRightRadius: 10,
+                      borderBottomRightRadius: 10,
+                      marginRight: -1,
+                    }}
+                    disabled={cartData?.quantity === cartData?.qty}
+                    onPress={() => dispatch(INC(productDetail))}
+                  >
+                    <Feather name="plus" size={24} color={"#FFF"} />
+                  </TouchableOpacity>
+                </View>
+              )
+            ) : (
+              <Text style={{ color: "#FF3838" }}>{i18n.t("out_of_stock")}</Text>
+            )}
           </View>
-          {productDetail?.description && <View style={{ marginTop: 10 }}>
-            <ThemedText style={{ fontSize: 16, fontWeight: 600 }}>{i18n.t('description')}</ThemedText>
-            <View style={styles.ul}>
-              <View style={styles.li}>
-                <ThemedText style={{ ...styles.bullet }}>-</ThemedText>
-                <HTMLView
-                  value={`<body>${productDetail?.description || ""}</body>`}
-                  stylesheet={{ body: { color: textColor } }}
-                />
+          {productDetail?.description && (
+            <View style={{ marginTop: 10 }}>
+              <ThemedText style={{ fontSize: 16, fontWeight: 600 }}>
+                {i18n.t("description")}
+              </ThemedText>
+              <View style={styles.ul}>
+                <View style={styles.li}>
+                  <ThemedText style={{ ...styles.bullet }}>-</ThemedText>
+                  <HTMLView
+                    value={`<body>${productDetail?.description || ""}</body>`}
+                    stylesheet={{ body: { color: textColor } }}
+                  />
+                </View>
               </View>
             </View>
-          </View>}
+          )}
         </ThemedView>
       </ThemeSafeAreaView>
       <CartItemTotal navigation={navigation} />

@@ -93,12 +93,6 @@ const ProfileEdit = () => {
     } else {
       errors = { ...errors, email: "" }
     }
-    if (!gst_number) {
-      errors = { ...errors, gst_number: "please enter gst number" };
-      isError = true;
-    } else {
-      errors = { ...errors, gst_number: "" }
-    }
     if (!b_address_line) {
       errors = { ...errors, b_address_line: "please enter address line" };
       isError = true;
@@ -118,10 +112,10 @@ const ProfileEdit = () => {
       errors = { ...errors, b_state: "" }
     }
     if (!b_pincode) {
-      errors = { ...errors, b_state: "please enter pincode" };
+      errors = { ...errors, b_pincode: "please enter pincode" };
       isError = true;
     } else {
-      errors = { ...errors, b_state: "" }
+      errors = { ...errors, b_pincode: "" }
     }
     if (!s_address_line) {
       errors = { ...errors, s_address_line: "please enter address line" };
@@ -212,9 +206,9 @@ const ProfileEdit = () => {
   }, []);
 
   return (
-    <ThemeSafeAreaView style={{ paddingHorizontal: 15 }}>
-      <ThemedView style={{ marginTop: 20, height: screenHeight - 65 }}>
-        <ScrollView showsVerticalScrollIndicator={false} style={{ marginBottom: 55 }}>
+    <ThemeSafeAreaView style={{ flex: 1, paddingHorizontal: 15 }}>
+      <ThemedView style={{ flex:1, marginTop: 20, marginBottom: 60}}>
+        <ScrollView showsVerticalScrollIndicator={false} style={{ height: screenHeight * 0.79 }}>
           <ThemedText style={{ marginBottom: 15 }}>{i18n.t('profile_detail')}</ThemedText>
           <FloatingInput
             label={i18n.t('full_name')}

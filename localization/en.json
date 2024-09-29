@@ -93,5 +93,6 @@
     "order_date": "Order Date",
     "order": "Order",
     "order_amount": "Order Amount",
-    "product_not_found": "Product Not Found"
+    "product_not_found": "Product Not Found",
+    "view_offer": "View Offer"
 }

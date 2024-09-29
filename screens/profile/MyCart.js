@@ -28,7 +28,7 @@ const MyCart = ({ navigation }) => {
   const [billingAmount, setBillingAmount] = useState({});
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState({})
+  const [selectedProduct, setSelectedProduct] = useState({});
   const { cartItem } = useSelector((state) => state?.cartItem);
 
   // theme color
@@ -50,7 +50,9 @@ const MyCart = ({ navigation }) => {
         );
       }
       const productParams = JSON.stringify({ products: Product });
-      const result = await axios.post(`${CALCULATEBILL}?payload=${productParams}&lang_code=${i18n.locale}`);
+      const result = await axios.post(
+        `${CALCULATEBILL}?payload=${productParams}&lang_code=${i18n.locale}`
+      );
       if (result?.data?.payload?.result) {
         setBillingAmount(result?.data?.payload?.result);
       }
@@ -95,11 +97,13 @@ const MyCart = ({ navigation }) => {
     }
   }, [cartItem]);
 
+  console.log(screenHeight);
+
   return (
     <>
-      <ThemeSafeAreaView style={{ paddingHorizontal: 15 }}>
-        <ThemedView style={{ marginTop: 20, height: screenHeight - 65 }}>
-          <ScrollView showsVerticalScrollIndicator={false}>
+      <ThemeSafeAreaView style={{ flex: 1, paddingHorizontal: 15 }}>
+        <ThemedView style={{ flex: 1, marginTop: 20 }}>
+          <ScrollView style={{ height: screenHeight * 0.89 }} showsVerticalScrollIndicator={false}>
             {cartItem && cartItem?.length > 0 ? (
               cartItem.map((item, index) => (
                 <ThemedView
@@ -117,7 +121,7 @@ const MyCart = ({ navigation }) => {
                       >
                         <Image
                           source={{
-                            uri: GetServerImage(item?.images?.[0]),
+                            uri: GetServerImage(item?.logo),
                           }}
                           style={styles.image}
                         />
@@ -176,7 +180,9 @@ const MyCart = ({ navigation }) => {
                         </View>
                       </View>
                       <View style={{ flexDirection: "row", alignItems: "center", marginTop: 2 }}>
-                        <ThemedText style={{ color: "gray", fontSize: 12 }}>{i18n.t('item_total')}:</ThemedText>
+                        <ThemedText style={{ color: "gray", fontSize: 12 }}>
+                          {i18n.t("item_total")}:
+                        </ThemedText>
                         <ThemedText style={{ fontSize: 12, marginLeft: 5 }}>
                           ₹ {billingAmount?.products?.[index]?.purchase_price?.toFixed(2) || 0}
                         </ThemedText>
@@ -189,7 +195,9 @@ const MyCart = ({ navigation }) => {
                           marginTop: -4,
                         }}
                       >
-                        <ThemedText style={{ color: "gray", fontSize: 12 }}>{i18n.t('tax')}:</ThemedText>
+                        <ThemedText style={{ color: "gray", fontSize: 12 }}>
+                          {i18n.t("tax")}:
+                        </ThemedText>
                         <ThemedText style={{ fontSize: 12, marginLeft: 5 }}>
                           ₹ {billingAmount?.products?.[index]?.gst_amount?.toFixed(2) || 0}
                         </ThemedText>
@@ -202,43 +210,47 @@ const MyCart = ({ navigation }) => {
                           marginTop: -4,
                         }}
                       >
-                        <ThemedText style={{ color: "gray", fontSize: 12 }}>{i18n.t('discount')}:</ThemedText>
+                        <ThemedText style={{ color: "gray", fontSize: 12 }}>
+                          {i18n.t("discount")}:
+                        </ThemedText>
                         <ThemedText style={{ fontSize: 12, marginLeft: 5 }}>
                           - ₹ {billingAmount?.products?.[index]?.offer_discount?.toFixed(2) || 0}
                         </ThemedText>
                       </View>
                     </View>
                   </View>
-                  <TouchableOpacity
-                    style={{
-                      ...styles.offerCard,
-                      backgroundColor: `${primaryColor}80`,
-                      marginTop: -8,
-                      marginHorizontal: 5,
-                    }}
-                    onPress={() => {
-                      setSelectedProduct(item)
-                      setModalVisible(true)
-                    }}
-                  >
-                    <View style={{ ...styles.offerDetail }}>
-                      <Entypo name="price-tag" size={24} color={textColor} />
-                      <ThemedText style={{ marginLeft: 5 }}>
-                        {item?.offers?.[0]?.offer_name}
-                      </ThemedText>
-                    </View>
-                    <View
+                  {item?.offers?.length > 0 && (
+                    <TouchableOpacity
                       style={{
-                        flexDirection: "row",
-                        alignItems: "center",
-                        justifyContent: "center",
+                        ...styles.offerCard,
+                        backgroundColor: `${primaryColor}80`,
+                        marginTop: -8,
+                        marginHorizontal: 5,
+                      }}
+                      onPress={() => {
+                        setSelectedProduct(item);
+                        setModalVisible(true);
                       }}
                     >
-                      <ThemedText>View Offer</ThemedText>
-                      <Feather name="chevron-right" size={18} color={textColor} />
-                    </View>
-                  </TouchableOpacity>
-                  
+                      <View style={{ ...styles.offerDetail }}>
+                        <Entypo name="price-tag" size={24} color={textColor} />
+                        <ThemedText style={{ marginLeft: 5 }}>
+                          {item?.offers?.[0]?.offer_name}
+                        </ThemedText>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <ThemedText>{i18n.t('view_offer')}</ThemedText>
+                        <Feather name="chevron-right" size={18} color={textColor} />
+                      </View>
+                    </TouchableOpacity>
+                  )}
+
                   <View
                     style={{ borderBottomWidth: 0.5, borderBottomColor: "gray", padding: 5 }}
                   ></View>
@@ -253,7 +265,7 @@ const MyCart = ({ navigation }) => {
                     onPress={() => dispatch(DELITEM(item))}
                   >
                     <Feather name="trash-2" size={20} color={textColor} />
-                    <ThemedText style={{ marginLeft: 5 }}>{i18n.t('remove_item')}</ThemedText>
+                    <ThemedText style={{ marginLeft: 5 }}>{i18n.t("remove_item")}</ThemedText>
                   </TouchableOpacity>
                 </ThemedView>
               ))
@@ -271,7 +283,7 @@ const MyCart = ({ navigation }) => {
                   style={{ width: 100, height: 100 }}
                 />
                 <ThemedText type="title" style={{ fontSize: 22 }}>
-                  {i18n.t('cart_not_found')}
+                  {i18n.t("cart_not_found")}
                 </ThemedText>
               </View>
             )}
@@ -289,22 +301,24 @@ const MyCart = ({ navigation }) => {
                   <View style={styles.cardDetail}>
                     <View style={styles.textContainer}>
                       <ThemedText style={{ fontSize: 20, fontWeight: 600, marginBottom: 10 }}>
-                        {i18n.t('order_detail')}
+                        {i18n.t("order_detail")}
                       </ThemedText>
                       <View>
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                           <ThemedText style={{ ...styles.price, fontSize: 16 }}>
-                            {i18n.t('sub_total')}
+                            {i18n.t("sub_total")}
                           </ThemedText>
                           <ThemedText>₹ {billingAmount?.order_amount?.toFixed(2)}</ThemedText>
                         </View>
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                          <ThemedText style={{ ...styles.price, fontSize: 16 }}>{i18n.t('gst')}</ThemedText>
+                          <ThemedText style={{ ...styles.price, fontSize: 16 }}>
+                            {i18n.t("gst")}
+                          </ThemedText>
                           <ThemedText>₹ {billingAmount?.tax_amount?.toFixed(2)}</ThemedText>
                         </View>
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                           <ThemedText style={{ ...styles.price, fontSize: 16 }}>
-                          {i18n.t('discount')}
+                            {i18n.t("discount")}
                           </ThemedText>
                           <ThemedText>- ₹ {billingAmount?.discount_amount?.toFixed(2)}</ThemedText>
                         </View>
@@ -324,7 +338,7 @@ const MyCart = ({ navigation }) => {
                           marginTop: 10,
                         }}
                       >
-                        <ThemedText style={{ fontSize: 16 }}>{i18n.t('payment_amount')}</ThemedText>
+                        <ThemedText style={{ fontSize: 16 }}>{i18n.t("payment_amount")}</ThemedText>
                         <ThemedText>₹ {billingAmount?.billing_amount?.toFixed(2)}</ThemedText>
                       </View>
                     </View>
@@ -336,7 +350,7 @@ const MyCart = ({ navigation }) => {
         </ThemedView>
         {cartItem?.length > 0 && (
           <ButtonPrimary
-            title={i18n.t('order_now')}
+            title={i18n.t("order_now")}
             style={{ position: "absolute", bottom: 10, width: "100%" }}
             handlePress={orderNow}
           />
@@ -345,8 +359,16 @@ const MyCart = ({ navigation }) => {
       {orderSuccess && (
         <View style={styles.imgContainer}>
           <Image source={require("../../assets/images/order2.gif")} />
-          <ThemedText style={{ fontSize: 18, marginBottom: 50, marginTop: -90, fontWeight: 600, fontFamily: 'PoppinsBold'}}>
-            {i18n.t('order_placed')}
+          <ThemedText
+            style={{
+              fontSize: 18,
+              marginBottom: 50,
+              marginTop: -90,
+              fontWeight: 600,
+              fontFamily: "PoppinsBold",
+            }}
+          >
+            {i18n.t("order_placed")}
           </ThemedText>
         </View>
       )}
@@ -383,7 +405,7 @@ const MyCart = ({ navigation }) => {
                   <TouchableOpacity
                     style={{ flexDirection: "row" }}
                     onPress={() => {
-                      item["selectedOffer"] = item?._id
+                      item["selectedOffer"] = item?._id;
                       setModalVisible(false);
                     }}
                     key={index}
@@ -393,7 +415,10 @@ const MyCart = ({ navigation }) => {
                         ...styles.radio,
                         borderRadius: 50,
                         borderColor: primaryColor,
-                        backgroundColor: selectedProduct?.selectedOffer === item?._id ? primaryColor : "transparent",
+                        backgroundColor:
+                          selectedProduct?.selectedOffer === item?._id
+                            ? primaryColor
+                            : "transparent",
                         marginRight: 10,
                         marginBottom: 15,
                       }}

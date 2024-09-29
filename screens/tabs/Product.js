@@ -121,7 +121,7 @@ const Product = ({ navigation, route }) => {
             >
               <Image
                 source={{
-                  uri: GetServerImage(item?.images?.[0]),
+                  uri: GetServerImage(item?.logo),
                 }}
                 style={styles.image}
               />
@@ -223,7 +223,7 @@ const Product = ({ navigation, route }) => {
               <ThemedText style={{ marginLeft: 5 }}>{item?.offers?.[0]?.offer_name}</ThemedText>
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-              <ThemedText>View Offer</ThemedText>
+              <ThemedText>{i18n.t('view_offer')}</ThemedText>
               <Feather name="chevron-right" size={18} color={textColor} />
             </View>
           </TouchableOpacity>

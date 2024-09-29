@@ -93,5 +93,6 @@
   "order_date": "आर्डर की तारीख",
   "order": "आदेश",
   "order_amount": "आदेश राशि",
-  "product_not_found": "उत्पाद नहीं मिला"
+  "product_not_found": "उत्पाद नहीं मिला",
+  "view_offer": "ऑफर देखें"
 }

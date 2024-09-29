@@ -224,7 +224,7 @@ const MyOrder = ({ navigation }) => {
               renderItem={renderOrder}
               showsVerticalScrollIndicator={false}
               //ListFooterComponent={renderFooter}
-              onEndReached={() => orderList()}
+              onEndReached={() => orderListData?.length > 4 && orderList()}
               onEndReachedThreshold={0.5}
               initialNumToRender={10}
               maxToRenderPerBatch={5}
