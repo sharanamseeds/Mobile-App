@@ -14,7 +14,7 @@ import {
 } from "react-native";
 import { Entypo, Feather } from "@expo/vector-icons";
 import { useThemeColor } from "../../hook/useThemeColor";
-import { REMOVECARTITEM } from "../../redux/cart/CartSlice";
+import { ADDOFFER, REMOVECARTITEM, REMOVEOFFER } from "../../redux/cart/CartSlice";
 import { GetServerImage } from "../../helper/helper";
 import { useContext, useEffect, useState } from "react";
 import { CALCULATEBILL, ORDER } from "../../constant/ApiRoutes";
@@ -30,7 +30,7 @@ const MyCart = ({ navigation }) => {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState({});
-  const {addQty, removeQty, removeCartItem} = useContext(AuthContext)
+  const { addQty, removeQty, removeCartItem, addOffer, removeOffer } = useContext(AuthContext);
   const { cartItem } = useSelector((state) => state?.cartItem);
 
   // theme color
@@ -47,7 +47,7 @@ const MyCart = ({ navigation }) => {
         cartItem.map((p) =>
           Product.push({
             product_id: p?._id,
-            offer_id: p?.selectedOffer || p?.offers?.[0]?._id,
+            offer_id: p?.selectedOffer || null,
             quantity: p?.qty,
           })
         );
@@ -72,7 +72,7 @@ const MyCart = ({ navigation }) => {
         cartItem.map((p) =>
           Product.push({
             product_id: p?._id,
-            offer_id: p?.selectedOffer || p?.offers?.[0]?._id,
+            offer_id: p?.selectedOffer || null,
             quantity: p?.qty,
           })
         );
@@ -220,7 +220,7 @@ const MyCart = ({ navigation }) => {
                       </View>
                     </View>
                   </View>
-                  {item?.offers?.length > 0 && (
+                  {item?.selectedOffer ? (
                     <TouchableOpacity
                       style={{
                         ...styles.offerCard,
@@ -236,8 +236,35 @@ const MyCart = ({ navigation }) => {
                       <View style={{ ...styles.offerDetail }}>
                         <Entypo name="price-tag" size={24} color={textColor} />
                         <ThemedText style={{ marginLeft: 5 }}>
-                          {item?.offers?.[0]?.offer_name}
+                          {item?.offers?.find((f) => f._id === item?.selectedOffer)?.offer_name}
                         </ThemedText>
+                      </View>
+                      <View
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <ThemedText>{i18n.t("view_offer")}</ThemedText>
+                        <Feather name="chevron-right" size={18} color={textColor} />
+                      </View>
+                    </TouchableOpacity>
+                  ) : (
+                    <TouchableOpacity
+                      style={{
+                        ...styles.offerCard,
+                        backgroundColor: `${primaryColor}80`,
+                        marginTop: -8,
+                        marginHorizontal: 5,
+                      }}
+                      onPress={() => {
+                        setSelectedProduct(item);
+                        setModalVisible(true);
+                      }}
+                    >
+                      <View style={{ ...styles.offerDetail }}>
+                        <Entypo name="price-tag" size={24} color={textColor} />
                       </View>
                       <View
                         style={{
@@ -406,6 +433,8 @@ const MyCart = ({ navigation }) => {
                   <TouchableOpacity
                     style={{ flexDirection: "row" }}
                     onPress={() => {
+                      dispatch(ADDOFFER({ ...selectedProduct, selectedOffer: item?._id }));
+                      addOffer({ ...selectedProduct, selectedOffer: item?._id })
                       item["selectedOffer"] = item?._id;
                       setModalVisible(false);
                     }}
@@ -443,9 +472,10 @@ const MyCart = ({ navigation }) => {
                 justifyContent: "center",
               }}
               onPress={() => {
-                setSelectedOffer(null);
                 setModalVisible(false);
-                dispatch(REMOVEOFFER(productDetail));
+                setSelectedProduct({ ...selectedProduct, selectedOffer: null });
+                dispatch(REMOVEOFFER(selectedProduct));
+                removeOffer(selectedProduct)
               }}
             >
               <Feather name="trash" size={18} color={"#FFF"} />

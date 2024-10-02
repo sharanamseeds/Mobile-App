@@ -118,11 +118,40 @@ const AuthProvider = ({ children }) => {
     }
   };
 
+  const addOffer = async (data) => {
+    try {
+      const cartItem = checkItemInCart(data?._id);
+      const request = {
+        selectedOffer: data?.selectedOffer,
+      };
+
+      await axios.put(`${ADDTOCART}/${cartItem?.cart_id}?payload=${JSON.stringify(request)}`);
+    } catch (error) {
+      console.log(error?.response?.data)
+      ShowErrorToast(error?.response?.data?.message);
+      console.log(error);
+    }
+  }
+
+  const removeOffer = async (data) => {
+    try {
+      const cartItem = checkItemInCart(data?._id);
+      const request = {
+        selectedOffer: null,
+      };
+
+      await axios.put(`${ADDTOCART}/${cartItem?.cart_id}?payload=${JSON.stringify(request)}`);
+    } catch (error) {
+      console.log(error?.response?.data)
+      ShowErrorToast(error?.response?.data?.message);
+      console.log(error);
+    }
+  }
+
   const addQty = async (data) => {
     try {
       const cartItem = checkItemInCart(data?._id);
       const request = {
-        product_id: data?._id,
         quantity: cartItem?.qty + 1,
       };
 
@@ -138,7 +167,6 @@ const AuthProvider = ({ children }) => {
     try {
       const cartItem = checkItemInCart(data?._id);
       const request = {
-        product_id: data?._id,
         quantity: cartItem?.qty - 1,
       };
 
@@ -187,7 +215,9 @@ const AuthProvider = ({ children }) => {
         addCart,
         addQty,
         removeQty,
-        removeCartItem
+        removeCartItem,
+        addOffer,
+        removeOffer
       }}
     >
       {children}

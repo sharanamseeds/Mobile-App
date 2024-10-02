@@ -16,7 +16,7 @@ const CartItemTotal = ({ navigation }) => {
     try {
       let Product = []
       if (cartItem?.length > 0) {
-        cartItem.map((p) => Product.push({product_id: p?._id, offer_id: p?.selectedOffer || p?.offers?.[0]?._id , quantity: p?.qty}))
+        cartItem.map((p) => Product.push({product_id: p?._id, offer_id: p?.selectedOffer || null , quantity: p?.qty}))
       }
       const productParams = JSON.stringify({products: Product})
       const result = await axios.post(`${CALCULATEBILL}?payload=${productParams}&lang_code=${i18n.locale}`)

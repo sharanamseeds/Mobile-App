@@ -39,7 +39,8 @@ const ProductDetail = ({ navigation, route }) => {
   const textColor = useThemeColor({}, "text");
   const boxColor = useThemeColor({}, "boxColor");
   const boxShadow = useThemeColor({}, "boxShadow");
-  const { showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem } = useContext(AuthContext);
+  const { showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem, addOffer, removeOffer } =
+    useContext(AuthContext);
 
   const getProductDetail = async (id) => {
     try {
@@ -145,13 +146,21 @@ const ProductDetail = ({ navigation, route }) => {
                 <Feather name="chevron-right" size={18} color={textColor} />
               </View>
             </TouchableOpacity>
-          ) : productDetail?.offers?.length > 0 && (
+          ) : cartData?.selectedOffer ? (
             <TouchableOpacity
               style={{ ...styles.offerCard, backgroundColor: `${primaryColor}80` }}
               onPress={() => setModalVisible(!modalVisible)}
             >
+              {console.log("calll +++")}
               <View style={{ ...styles.offerDetail }}>
                 <Entypo name="price-tag" size={24} color={textColor} />
+                <View>
+                  <ThemedText style={{ marginLeft: 5 }}>{productDetail?.offers?.find((f) => f._id === cartData?.selectedOffer)?.offer_name}</ThemedText>
+                  <ThemedText style={{ fontSize: 12, marginLeft: 5, marginTop: -4 }}>
+                    {productDetail?.offers?.find((f) => f._id === cartData?.selectedOffer)?.offer_code} ({productDetail?.offers?.find((f) => f._id === cartData?.selectedOffer)?.percentage_discount}
+                    {productDetail?.offers?.find((f) => f._id === cartData?.selectedOffer)?.offer_type === "percentage" ? "% off" : "off"})
+                  </ThemedText>
+                </View>
               </View>
               <View
                 style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}
@@ -160,6 +169,23 @@ const ProductDetail = ({ navigation, route }) => {
                 <Feather name="chevron-right" size={18} color={textColor} />
               </View>
             </TouchableOpacity>
+          ) : (
+            productDetail?.offers?.length > 0 && (
+              <TouchableOpacity
+                style={{ ...styles.offerCard, backgroundColor: `${primaryColor}80` }}
+                onPress={() => setModalVisible(!modalVisible)}
+              >
+                <View style={{ ...styles.offerDetail }}>
+                  <Entypo name="price-tag" size={24} color={textColor} />
+                </View>
+                <View
+                  style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}
+                >
+                  <ThemedText>{i18n.t("view_offer")}</ThemedText>
+                  <Feather name="chevron-right" size={18} color={textColor} />
+                </View>
+              </TouchableOpacity>
+            )
           )}
           <View style={styles.priceCard}>
             <View>
@@ -211,9 +237,7 @@ const ProductDetail = ({ navigation, route }) => {
                       marginLeft: -1,
                     }}
                     onPress={() =>
-                      cartData?.qty === 1
-                        ? removeCartItem(productDetail)
-                        : removeQty(productDetail)
+                      cartData?.qty === 1 ? removeCartItem(productDetail) : removeQty(productDetail)
                     }
                   >
                     <Feather
@@ -294,7 +318,8 @@ const ProductDetail = ({ navigation, route }) => {
                   <TouchableOpacity
                     style={{ flexDirection: "row" }}
                     onPress={() => {
-                      dispatch(ADDOFFER({...productDetail, selectedOffer: item?._id}))
+                      dispatch(ADDOFFER({ ...productDetail, selectedOffer: item?._id }));
+                      addOffer({ ...productDetail, selectedOffer: item?._id })
                       setSelectedOffer(item);
                       setModalVisible(false);
                     }}
@@ -305,7 +330,8 @@ const ProductDetail = ({ navigation, route }) => {
                         ...styles.radio,
                         borderRadius: 50,
                         borderColor: primaryColor,
-                        backgroundColor: selectedOffer?._id === item?._id ? primaryColor : "transparent",
+                        backgroundColor:
+                          cartData?.selectedOffer === item?._id ? primaryColor : "transparent",
                         marginRight: 10,
                         marginBottom: 15,
                       }}
@@ -331,7 +357,8 @@ const ProductDetail = ({ navigation, route }) => {
               onPress={() => {
                 setSelectedOffer(null);
                 setModalVisible(false);
-                dispatch(REMOVEOFFER(productDetail))
+                dispatch(REMOVEOFFER(productDetail));
+                removeOffer(productDetail)
               }}
             >
               <Feather name="trash" size={18} color={"#FFF"} />

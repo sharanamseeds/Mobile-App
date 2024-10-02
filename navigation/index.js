@@ -30,6 +30,8 @@ import { useDispatch } from "react-redux";
 import { SETCARTITEM } from "../redux/cart/CartSlice";
 import i18n from "../i18n";
 import Language from "../screens/Languages/language";
+import axios from "axios";
+import { GETCART } from "../constant/ApiRoutes";
 
 const Stack = createNativeStackNavigator();
 const BottomTab = createBottomTabNavigator();
@@ -435,15 +437,28 @@ const StackNav = () => {
   );
 };
 
+const setCartItems = async() => {
+  try {
+    const response = await axios.get(GETCART)
+    let cartData = []
+    if (response.data?.payload?.result?.data?.length > 0) {
+      response.data?.payload?.result?.data?.map((cart, index) => {
+        cartData.push({_id: cart?.product_id, ...cart.product, qty: cart?.quantity, selectedOffer: cart?.selectedOffer, cart_id: cart?._id})
+      })
+    }
+    return cartData
+  } catch(error) {
+    console.log(error)
+  }
+}
+
 const Navbar = () => {
   const colorScheme = useColorScheme();
   const { loading, setUserName, changeLanguage } = useContext(AuthContext);
   const dispatch = useDispatch();
 
   const setCartItem = async () => {
-    const CartItem = (await AsyncStorage.getItem("cartdata"))
-      ? JSON.parse(await AsyncStorage.getItem("cartdata"))
-      : [];
+    const CartItem = await setCartItems();
     dispatch(SETCARTITEM(CartItem));
     const userData = (await AsyncStorage.getItem("user_data"))
       ? JSON.parse(await AsyncStorage.getItem("user_data"))

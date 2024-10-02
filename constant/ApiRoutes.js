@@ -19,3 +19,4 @@ export const RESENDOTP = "/auth/resend_verification_code"
 export const BANNER = '/banners/user'
 export const DOWNLOADBILL = '/bills/user/download-bill'
 export const RETURNORDER = '/orders/return/user'
+export const GETCART = '/cart/user'
