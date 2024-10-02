@@ -14,13 +14,14 @@ import {
 } from "react-native";
 import { Entypo, Feather } from "@expo/vector-icons";
 import { useThemeColor } from "../../hook/useThemeColor";
-import { INC, DEC, DELITEM, REMOVECARTITEM } from "../../redux/cart/CartSlice";
-import { GetServerImage, ShowSuccessToast } from "../../helper/helper";
-import { useEffect, useState } from "react";
+import { REMOVECARTITEM } from "../../redux/cart/CartSlice";
+import { GetServerImage } from "../../helper/helper";
+import { useContext, useEffect, useState } from "react";
 import { CALCULATEBILL, ORDER } from "../../constant/ApiRoutes";
 import axios from "axios";
 import ButtonPrimary from "../../components/ButtonPrimary";
 import i18n from "../../i18n";
+import { AuthContext } from "../../context/authContext";
 
 const MyCart = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -29,11 +30,13 @@ const MyCart = ({ navigation }) => {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState({});
+  const {addQty, removeQty, removeCartItem} = useContext(AuthContext)
   const { cartItem } = useSelector((state) => state?.cartItem);
 
   // theme color
   const textColor = useThemeColor({}, "text");
   const primaryColor = useThemeColor({}, "primary");
+  const secondaryColor = useThemeColor({}, "secondary");
   const boxColor = useThemeColor({}, "boxColor");
   const boxShadow = useThemeColor({}, "boxShadow");
 
@@ -97,8 +100,6 @@ const MyCart = ({ navigation }) => {
     }
   }, [cartItem]);
 
-  console.log(screenHeight);
-
   return (
     <>
       <ThemeSafeAreaView style={{ flex: 1, paddingHorizontal: 15 }}>
@@ -154,7 +155,7 @@ const MyCart = ({ navigation }) => {
                               marginLeft: -1,
                             }}
                             onPress={() =>
-                              item?.qty === 1 ? dispatch(DELITEM(item)) : dispatch(DEC(item))
+                              item?.qty === 1 ? removeCartItem(item) : removeQty(item)
                             }
                           >
                             <Feather
@@ -173,7 +174,7 @@ const MyCart = ({ navigation }) => {
                               marginRight: -1,
                             }}
                             disabled={item?.quantity === item?.qty}
-                            onPress={() => dispatch(INC(item))}
+                            onPress={() => addQty(item)}
                           >
                             <Feather name="plus" size={24} color={"#FFF"} />
                           </TouchableOpacity>
@@ -245,7 +246,7 @@ const MyCart = ({ navigation }) => {
                           justifyContent: "center",
                         }}
                       >
-                        <ThemedText>{i18n.t('view_offer')}</ThemedText>
+                        <ThemedText>{i18n.t("view_offer")}</ThemedText>
                         <Feather name="chevron-right" size={18} color={textColor} />
                       </View>
                     </TouchableOpacity>
@@ -262,7 +263,7 @@ const MyCart = ({ navigation }) => {
                       alignItems: "center",
                       padding: 8,
                     }}
-                    onPress={() => dispatch(DELITEM(item))}
+                    onPress={() => removeCartItem(item)}
                   >
                     <Feather name="trash-2" size={20} color={textColor} />
                     <ThemedText style={{ marginLeft: 5 }}>{i18n.t("remove_item")}</ThemedText>
@@ -430,6 +431,28 @@ const MyCart = ({ navigation }) => {
                   </TouchableOpacity>
                 ))}
             </View>
+            <TouchableOpacity
+              style={{
+                flexDirection: "row",
+                backgroundColor: secondaryColor,
+                width: "100%",
+                padding: 10,
+                borderRadius: 50,
+                marginTop: 10,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={() => {
+                setSelectedOffer(null);
+                setModalVisible(false);
+                dispatch(REMOVEOFFER(productDetail));
+              }}
+            >
+              <Feather name="trash" size={18} color={"#FFF"} />
+              <Text style={{ color: "#FFF", marginRight: 15, fontSize: 18 }}>
+                {i18n.t("clear_filter")}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>

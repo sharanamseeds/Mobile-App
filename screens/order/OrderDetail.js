@@ -202,6 +202,7 @@ const OrderDetail = ({ navigation, route }) => {
                 justifyContent: "center",
                 alignItems: "center",
               }}
+              disabled={orderDetail?.is_returned}
               onPress={() => returnOrder(orderDetail?._id)}
             >
               <Text

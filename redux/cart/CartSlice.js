@@ -58,17 +58,44 @@ export const counterSlice = createSlice({
         AsyncStorage.setItem("cartdata", JSON.stringify(state.cartItem));
       }
     },
+    REMOVEOFFER: (state, action) => {
+      const productexist = state.cartItem.find((item) => item._id === action.payload._id);
+      if (productexist) {
+        let updateddata = state.cartItem.map((curval) => {
+          if (curval._id === action.payload._id) {
+            return { ...curval, selectedOffer: "" };
+          }
+          return curval;
+        });
+        state.cartItem = [...updateddata];
+        AsyncStorage.setItem("cartdata", JSON.stringify(state.cartItem));
+      }
+    },
+    ADDOFFER: (state, action) => {
+      const productexist = state.cartItem.find((item) => item._id === action.payload._id);
+      if (productexist) {
+        let updateddata = state.cartItem.map((curval) => {
+          if (curval._id === action.payload._id) {
+            return { ...curval, selectedOffer: action.payload?.selectedOffer };
+          }
+          return curval;
+        });
+        console.log(updateddata)
+        state.cartItem = [...updateddata];
+        AsyncStorage.setItem("cartdata", JSON.stringify(state.cartItem));
+      }
+    },
     REMOVECARTITEM: (state, action) => {
-      state.cartItem = []
+      state.cartItem = [];
       AsyncStorage.setItem("cartdata", JSON.stringify(state.cartItem));
     },
     SETCARTITEM: (state, action) => {
-      state.cartItem = action.payload
-    }
+      state.cartItem = action.payload;
+    },
   },
 });
 
 // Action creators are generated for each case reducer function
-export const { INC, DEC, ADDCART, DELITEM, REMOVECARTITEM, SETCARTITEM } = counterSlice.actions;
+export const { INC, DEC, ADDCART, DELITEM, REMOVECARTITEM, SETCARTITEM, REMOVEOFFER, ADDOFFER } = counterSlice.actions;
 
 export default counterSlice.reducer;

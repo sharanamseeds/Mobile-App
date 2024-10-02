@@ -14,7 +14,7 @@ import { useThemeColor } from "../../hook/useThemeColor";
 import { ThemedText } from "../../components/ThemedText";
 import { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { ADDCART, DEC, DELITEM, INC } from "../../redux/cart/CartSlice";
+import { ADDOFFER, REMOVEOFFER } from "../../redux/cart/CartSlice";
 import { Entypo, Feather } from "@expo/vector-icons";
 import CartItemTotal from "../../components/CartItemTotal";
 import axios from "axios";
@@ -33,19 +33,19 @@ const ProductDetail = ({ navigation, route }) => {
   const dispatch = useDispatch();
   const [productDetail, setProductDetail] = useState([]);
   const [modalVisible, setModalVisible] = useState(false);
-  const [selectedOffer, setSelectedOffer] = useState("");
+  const [selectedOffer, setSelectedOffer] = useState(null);
   const primaryColor = useThemeColor({}, "primary");
+  const secondaryColor = useThemeColor({}, "secondary");
   const textColor = useThemeColor({}, "text");
   const boxColor = useThemeColor({}, "boxColor");
   const boxShadow = useThemeColor({}, "boxShadow");
-  const { showLoader, hideLoader } = useContext(AuthContext);
+  const { showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem } = useContext(AuthContext);
 
   const getProductDetail = async (id) => {
     try {
       showLoader();
       const productDoc = await axios.get(`${PRODUCTDETAIL}/${id}?lang_code=${i18n.locale}`);
       setProductDetail(productDoc?.data?.payload?.result?.product);
-      setSelectedOffer(productDoc?.data?.payload?.result?.product?.offers?.[0]?._id);
       hideLoader();
     } catch (error) {
       hideLoader();
@@ -95,7 +95,7 @@ const ProductDetail = ({ navigation, route }) => {
             renderItem={({ item, index }) => (
               <View style={styles.imageCard} key={index}>
                 <Image
-                  style={{borderRadius: 20}}
+                  style={{ borderRadius: 20 }}
                   source={{
                     uri: GetServerImage(item),
                   }}
@@ -123,7 +123,7 @@ const ProductDetail = ({ navigation, route }) => {
             marginTop: 1,
           }}
         >
-          {productDetail?.offers?.length > 0 && (
+          {selectedOffer ? (
             <TouchableOpacity
               style={{ ...styles.offerCard, backgroundColor: `${primaryColor}80` }}
               onPress={() => setModalVisible(!modalVisible)}
@@ -131,15 +131,27 @@ const ProductDetail = ({ navigation, route }) => {
               <View style={{ ...styles.offerDetail }}>
                 <Entypo name="price-tag" size={24} color={textColor} />
                 <View>
-                  <ThemedText style={{ marginLeft: 5 }}>
-                    {productDetail?.offers?.[0]?.offer_name}
-                  </ThemedText>
+                  <ThemedText style={{ marginLeft: 5 }}>{selectedOffer?.offer_name}</ThemedText>
                   <ThemedText style={{ fontSize: 12, marginLeft: 5, marginTop: -4 }}>
-                    {productDetail?.offers?.[0]?.offer_code} (
-                    {productDetail?.offers?.[0]?.percentage_discount}
-                    {productDetail?.offers?.[0]?.offer_type === "percentage" ? "% off" : "off"})
+                    {selectedOffer?.offer_code} ({selectedOffer?.percentage_discount}
+                    {selectedOffer?.offer_type === "percentage" ? "% off" : "off"})
                   </ThemedText>
                 </View>
+              </View>
+              <View
+                style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}
+              >
+                <ThemedText>{i18n.t("view_offer")}</ThemedText>
+                <Feather name="chevron-right" size={18} color={textColor} />
+              </View>
+            </TouchableOpacity>
+          ) : productDetail?.offers?.length > 0 && (
+            <TouchableOpacity
+              style={{ ...styles.offerCard, backgroundColor: `${primaryColor}80` }}
+              onPress={() => setModalVisible(!modalVisible)}
+            >
+              <View style={{ ...styles.offerDetail }}>
+                <Entypo name="price-tag" size={24} color={textColor} />
               </View>
               <View
                 style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}
@@ -172,9 +184,8 @@ const ProductDetail = ({ navigation, route }) => {
                     justifyContent: "center",
                     alignItems: "center",
                   }}
-                  disabled={cartData?.quantity === cartData?.qty}
                   onPress={() =>
-                    dispatch(ADDCART({ ...productDetail, selectedOffer: selectedOffer, qty: 1 }))
+                    addCart({ ...productDetail, selectedOffer: selectedOffer?._id, qty: 1 })
                   }
                 >
                   <Text
@@ -201,8 +212,8 @@ const ProductDetail = ({ navigation, route }) => {
                     }}
                     onPress={() =>
                       cartData?.qty === 1
-                        ? dispatch(DELITEM(productDetail))
-                        : dispatch(DEC(productDetail))
+                        ? removeCartItem(productDetail)
+                        : removeQty(productDetail)
                     }
                   >
                     <Feather
@@ -221,7 +232,7 @@ const ProductDetail = ({ navigation, route }) => {
                       marginRight: -1,
                     }}
                     disabled={cartData?.quantity === cartData?.qty}
-                    onPress={() => dispatch(INC(productDetail))}
+                    onPress={() => addQty(productDetail)}
                   >
                     <Feather name="plus" size={24} color={"#FFF"} />
                   </TouchableOpacity>
@@ -283,7 +294,8 @@ const ProductDetail = ({ navigation, route }) => {
                   <TouchableOpacity
                     style={{ flexDirection: "row" }}
                     onPress={() => {
-                      setSelectedOffer(item?._id);
+                      dispatch(ADDOFFER({...productDetail, selectedOffer: item?._id}))
+                      setSelectedOffer(item);
                       setModalVisible(false);
                     }}
                     key={index}
@@ -293,7 +305,7 @@ const ProductDetail = ({ navigation, route }) => {
                         ...styles.radio,
                         borderRadius: 50,
                         borderColor: primaryColor,
-                        backgroundColor: selectedOffer === item?._id ? primaryColor : "transparent",
+                        backgroundColor: selectedOffer?._id === item?._id ? primaryColor : "transparent",
                         marginRight: 10,
                         marginBottom: 15,
                       }}
@@ -305,6 +317,28 @@ const ProductDetail = ({ navigation, route }) => {
                   </TouchableOpacity>
                 ))}
             </View>
+            <TouchableOpacity
+              style={{
+                flexDirection: "row",
+                backgroundColor: secondaryColor,
+                width: "100%",
+                padding: 10,
+                borderRadius: 50,
+                marginTop: 10,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={() => {
+                setSelectedOffer(null);
+                setModalVisible(false);
+                dispatch(REMOVEOFFER(productDetail))
+              }}
+            >
+              <Feather name="trash" size={18} color={"#FFF"} />
+              <Text style={{ color: "#FFF", marginRight: 15, fontSize: 18 }}>
+                {i18n.t("clear_filter")}
+              </Text>
+            </TouchableOpacity>
           </View>
         </View>
       </Modal>
@@ -405,7 +439,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   modalView: {
-    borderRadius: 20,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
     paddingHorizontal: 15,
     paddingVertical: 20,
     bottom: 0,

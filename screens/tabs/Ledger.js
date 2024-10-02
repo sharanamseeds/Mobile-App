@@ -228,13 +228,13 @@ const Ledger = ({ navigation }) => {
           }}
         >
           <SearchBar
-            placeholder={i18n.t("type_here")}
+            placeholder={i18n.t("search_by_invoice")}
             round={true}
             containerStyle={{
               backgroundColor: background,
               borderWidth: 0,
               borderColor: background,
-              width: "86%",
+              width: "84%",
               padding: 0,
             }}
             inputContainerStyle={{
@@ -251,7 +251,7 @@ const Ledger = ({ navigation }) => {
           />
           <TouchableOpacity
             style={{
-              width: "12%",
+              width: 45,
               paddingHorizontal: 10,
               height: 45,
               flexDirection: "column",

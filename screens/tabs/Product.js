@@ -18,8 +18,7 @@ import {
 } from "react-native";
 import { ThemedText } from "../../components/ThemedText";
 import ThemeSafeAreaViewWOS from "../../components/ThemeSafeAreaViewWOS";
-import { useDispatch, useSelector } from "react-redux";
-import { ADDCART, INC, DEC, DELITEM } from "../../redux/cart/CartSlice";
+import { useSelector } from "react-redux";
 import CartItemTotal from "../../components/CartItemTotal";
 import axios from "axios";
 import { BRANDLIST, CATEGORYLIST, PRODUCTLIST } from "../../constant/ApiRoutes";
@@ -42,9 +41,9 @@ const Product = ({ navigation, route }) => {
     category_id: "all",
     brand_id: "all",
   });
-  const dispatch = useDispatch();
+
   const { cartItem } = useSelector((state) => state?.cartItem);
-  const { loading, showLoader, hideLoader } = useContext(AuthContext);
+  const { loading, showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem } = useContext(AuthContext);
   const screenHeight = Dimensions.get("window").height;
   // theme color
   const textColor = useThemeColor({}, "text");
@@ -151,9 +150,7 @@ const Product = ({ navigation, route }) => {
                       marginVertical: 10,
                     }}
                     disabled={checkOutOfStock(item?.quantity, item?._id)}
-                    onPress={() =>
-                      dispatch(ADDCART({ ...item, selectedOffer: item?.offers?.[0]?._id, qty: 1 }))
-                    }
+                    onPress={() => addCart({ ...item, qty: 1 })}
                   >
                     <Text
                       style={{
@@ -179,8 +176,8 @@ const Product = ({ navigation, route }) => {
                       }}
                       onPress={() =>
                         checkItemInCart(item?._id)?.qty === 1
-                          ? dispatch(DELITEM(item))
-                          : dispatch(DEC(item))
+                          ? removeCartItem(item)
+                          : removeQty(item)
                       }
                     >
                       <Feather
@@ -201,7 +198,7 @@ const Product = ({ navigation, route }) => {
                         marginRight: -1,
                       }}
                       disabled={checkOutOfStock(item?.quantity, item?._id)}
-                      onPress={() => dispatch(INC(item))}
+                      onPress={() => addQty(item)}
                     >
                       <Feather name="plus" size={24} color={"#FFF"} />
                     </TouchableOpacity>
@@ -223,7 +220,7 @@ const Product = ({ navigation, route }) => {
               <ThemedText style={{ marginLeft: 5 }}>{item?.offers?.[0]?.offer_name}</ThemedText>
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-              <ThemedText>{i18n.t('view_offer')}</ThemedText>
+              <ThemedText>{i18n.t("view_offer")}</ThemedText>
               <Feather name="chevron-right" size={18} color={textColor} />
             </View>
           </TouchableOpacity>
@@ -254,7 +251,7 @@ const Product = ({ navigation, route }) => {
         category_id: filters?.category_id === "all" ? "" : filters?.category_id,
         search: searchTerm,
         page: reset ? 1 : page,
-        lang_code: i18n.locale
+        lang_code: i18n.locale,
       };
 
       const response = await axios.get(PRODUCTLIST, { params });
@@ -332,7 +329,7 @@ const Product = ({ navigation, route }) => {
               backgroundColor: background,
               borderWidth: 0,
               borderColor: background,
-              width: "86%",
+              width: "84%",
               padding: 0,
             }}
             inputContainerStyle={{
@@ -349,7 +346,7 @@ const Product = ({ navigation, route }) => {
           />
           <TouchableOpacity
             style={{
-              width: "12%",
+              width: 45,
               paddingHorizontal: 10,
               height: 45,
               flexDirection: "column",

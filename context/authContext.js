@@ -1,9 +1,11 @@
 import React, { createContext, useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
-import { LOGIN } from "../constant/ApiRoutes";
+import { ADDTOCART, LOGIN } from "../constant/ApiRoutes";
 import { ShowErrorToast, ShowSuccessToast } from "../helper/helper";
 import i18n from "../i18n";
+import { ADDCART, DEC, DELITEM, INC } from "../redux/cart/CartSlice";
+import { useDispatch, useSelector } from "react-redux";
 
 //create context
 const AuthContext = createContext();
@@ -12,16 +14,24 @@ const AuthContext = createContext();
 const AuthProvider = ({ children }) => {
   //states
   const [token, setToken] = useState(null);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const [userData, setUserData] = useState({});
   const [authLoading, setAuthLoading] = useState(null);
-  const [userName, setUserName] = useState("")
+  const [userName, setUserName] = useState("");
   const [language, setLanguage] = useState(i18n.locale);
+  const { cartItem } = useSelector((state) => state?.cartItem);
+  const dispatch = useDispatch()
 
-  const changeLanguage = async(lang) => {
+  const checkItemInCart = (id) => {
+    if (cartItem && cartItem?.length > 0) {
+      return cartItem?.find((f) => f?._id === id);
+    }
+  };
+
+  const changeLanguage = async (lang) => {
     i18n.locale = lang;
     setLanguage(lang);
-    await AsyncStorage.setItem('lang', lang)
+    await AsyncStorage.setItem("lang", lang);
   };
 
   //load storage
@@ -56,7 +66,7 @@ const AuthProvider = ({ children }) => {
         AsyncStorage.setItem("token", token);
         AsyncStorage.setItem("refresh_token", refresh_token);
         AsyncStorage.setItem("user_data", JSON.stringify(user));
-        setUserName(user?.name)
+        setUserName(user?.name);
 
         ShowSuccessToast(response?.data?.message);
         //set state
@@ -82,8 +92,77 @@ const AuthProvider = ({ children }) => {
     setAuthLoading(false);
   };
 
-  const showLoader = () => setLoading(true)
-  const hideLoader = () => setLoading(false)
+  const addCart = async (data) => {
+    showLoader();
+    try {
+      const request = {
+        product_id: data?._id,
+        quantity: data?.qty,
+      };
+
+      const response = await axios.post(`${ADDTOCART}?payload=${JSON.stringify(request)}`);
+      dispatch(
+        ADDCART({
+          ...data,
+          qty: 1,
+          cart_id: response?.data?.payload?.result?._id,
+        })
+      );
+      setTimeout(() => {
+        hideLoader();
+      }, 1000);
+    } catch (error) {
+      hideLoader();
+      ShowErrorToast(error?.response?.data?.message);
+      console.log(error);
+    }
+  };
+
+  const addQty = async (data) => {
+    try {
+      const cartItem = checkItemInCart(data?._id);
+      const request = {
+        product_id: data?._id,
+        quantity: cartItem?.qty + 1,
+      };
+
+      await axios.put(`${ADDTOCART}/${cartItem?.cart_id}?payload=${JSON.stringify(request)}`);
+      dispatch(INC(data));
+    } catch (error) {
+      ShowErrorToast(error?.response?.data?.message);
+      console.log(error);
+    }
+  };
+
+  const removeQty = async (data) => {
+    try {
+      const cartItem = checkItemInCart(data?._id);
+      const request = {
+        product_id: data?._id,
+        quantity: cartItem?.qty - 1,
+      };
+
+      await axios.put(`${ADDTOCART}/${cartItem?.cart_id}?payload=${JSON.stringify(request)}`);
+      dispatch(DEC(data));
+    } catch (error) {
+      ShowErrorToast(error?.response?.data?.message);
+      console.log(error);
+    }
+  };
+
+  const removeCartItem = async (data) => {
+    try {
+      const cartItem = checkItemInCart(data?._id);
+      await axios.delete(`${ADDTOCART}/${cartItem?.cart_id}`);
+      dispatch(DELITEM(data));
+    } catch (error) {
+      ShowErrorToast(error?.response?.data?.message);
+      console.log(error);
+    }
+  };
+
+  const showLoader = () => setLoading(true);
+  const hideLoader = () => setLoading(false);
 
   //use effect
   useEffect(() => {
@@ -91,7 +170,26 @@ const AuthProvider = ({ children }) => {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ token, userData, authLoading, signOut, signIn, showLoader, hideLoader, loading, userName, setUserName, changeLanguage, language}}>
+    <AuthContext.Provider
+      value={{
+        token,
+        userData,
+        authLoading,
+        signOut,
+        signIn,
+        showLoader,
+        hideLoader,
+        loading,
+        userName,
+        setUserName,
+        changeLanguage,
+        language,
+        addCart,
+        addQty,
+        removeQty,
+        removeCartItem
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

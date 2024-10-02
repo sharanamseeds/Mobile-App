@@ -21,7 +21,7 @@
   "home": "ઘર",
   "ladger": "ખાતાવહી",
   "profile": "પ્રોફાઇલ",
-  "type_here": "અહીં લખો...",
+  "type_here": "નામ અથવા કોડ દ્વારા શોધો...",
   "product_detail": "ઉત્પાદન વિગતો",
   "description": "વર્ણન",
   "go_to_cart": "કાર્ટ પર જાઓ",
@@ -94,5 +94,6 @@
   "order": "ઓર્ડર",
   "order_amount": "ઓર્ડરની રકમ",
   "product_not_found": "ઉત્પાદન મળ્યું નથી",
-  "view_offer": "ઓફર જુઓ"
+  "view_offer": "ઓફર જુઓ",
+  "search_by_invoice": "ઇન્વોઇસ દ્વારા શોધો..."
 }

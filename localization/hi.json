@@ -21,7 +21,7 @@
   "home": "घर",
   "ladger": "खाता बही",
   "profile": "प्रोफ़ाइल",
-  "type_here": "यहाँ टाइप करें...",
+  "type_here": "नाम या कोड से खोजें...",
   "product_detail": "उत्पाद विवरण",
   "description": "विवरण",
   "go_to_cart": "गाड़ी पर जाना",
@@ -94,5 +94,6 @@
   "order": "आदेश",
   "order_amount": "आदेश राशि",
   "product_not_found": "उत्पाद नहीं मिला",
-  "view_offer": "ऑफर देखें"
+  "view_offer": "ऑफर देखें",
+  "search_by_invoice": "चालान द्वारा खोजें..."
 }

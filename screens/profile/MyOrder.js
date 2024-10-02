@@ -198,7 +198,7 @@ const MyOrder = ({ navigation }) => {
         </ThemedText>
         <TouchableOpacity
           style={{
-            width: "12%",
+            width: 45,
             paddingHorizontal: 10,
             height: 45,
             flexDirection: "column",
@@ -265,7 +265,7 @@ const MyOrder = ({ navigation }) => {
               ...styles.modalView,
               backgroundColor: boxColor,
               shadowColor: boxShadow,
-              height: "80%",
+              height: "68%",
             }}
           >
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -298,34 +298,6 @@ const MyOrder = ({ navigation }) => {
                         borderColor: primaryColor,
                         backgroundColor:
                           selectedFilter?.status === item?.value ? primaryColor : "transparent",
-                        marginRight: 10,
-                        marginBottom: 15,
-                      }}
-                    ></View>
-                    <ThemedText>{item?.label}</ThemedText>
-                  </TouchableOpacity>
-                ))}
-            </View>
-            <ThemedText style={{ fontSize: 18, marginTop: 12 }}>{i18n.t('by_order_type')}</ThemedText>
-            <View style={{ marginTop: 15 }}>
-              {orderType?.length > 0 &&
-                orderType.map((item, index) => (
-                  <TouchableOpacity
-                    style={{ flexDirection: "row" }}
-                    key={index}
-                    onPress={() => {
-                      setSelectedFilter({ ...selectedFilter, order_type: item?.value });
-                      setFilter({ ...filter, order_type: item?.value });
-                      setModalVisible(false);
-                    }}
-                  >
-                    <View
-                      style={{
-                        ...styles.radio,
-                        borderRadius: 50,
-                        borderColor: primaryColor,
-                        backgroundColor:
-                          selectedFilter?.order_type === item?.value ? primaryColor : "transparent",
                         marginRight: 10,
                         marginBottom: 15,
                       }}

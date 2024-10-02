@@ -21,7 +21,7 @@
     "home": "Home",
     "ladger": "Ledger",
     "profile": "Profile",
-    "type_here": "Type Here...",
+    "type_here": "search by name or code...",
     "product_detail" : "Product Detail",
     "description": "Description",
     "go_to_cart": "Go to cart",
@@ -94,5 +94,6 @@
     "order": "Order",
     "order_amount": "Order Amount",
     "product_not_found": "Product Not Found",
-    "view_offer": "View Offer"
+    "view_offer": "View Offer",
+    "search_by_invoice": "search by invoice..."
 }
