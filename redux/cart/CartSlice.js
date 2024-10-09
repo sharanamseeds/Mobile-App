@@ -63,7 +63,7 @@ export const counterSlice = createSlice({
       if (productexist) {
         let updateddata = state.cartItem.map((curval) => {
           if (curval._id === action.payload._id) {
-            return { ...curval, selectedOffer: "" };
+            return { ...curval, selectedOffer: null };
           }
           return curval;
         });
@@ -80,7 +80,6 @@ export const counterSlice = createSlice({
           }
           return curval;
         });
-        console.log(updateddata)
         state.cartItem = [...updateddata];
         AsyncStorage.setItem("cartdata", JSON.stringify(state.cartItem));
       }

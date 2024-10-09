@@ -166,7 +166,7 @@ const MyAccount = ({ navigation }) => {
             userDetail?.shipping_address?.pincode || ""
           }`}</ThemedText>
         </View>
-        <View style={{ marginTop: 30 }}>
+        <View style={{ marginTop: 30, marginBottom: 15 }}>
           <ThemedText style={{ fontSize: 22, fontWeight: 600, marginBottom: 20 }}>
             {i18n.t("document_pending")}
           </ThemedText>
@@ -248,11 +248,11 @@ const MyAccount = ({ navigation }) => {
             </TouchableOpacity>
           )}
         </View>
-        <ButtonPrimary
+        {/* <ButtonPrimary
           title={"Upload Pending Document"}
           style={{ marginTop: 10, marginBottom: 20, padding: 10 }}
           handlePress={() => console.log("call")}
-        />
+        /> */}
       </ThemedView>
     </ThemeSafeAreaView>
   );

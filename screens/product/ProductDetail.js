@@ -39,7 +39,7 @@ const ProductDetail = ({ navigation, route }) => {
   const textColor = useThemeColor({}, "text");
   const boxColor = useThemeColor({}, "boxColor");
   const boxShadow = useThemeColor({}, "boxShadow");
-  const { showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem, addOffer, removeOffer } =
+  const { showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem, addOffer, removeOffer, cartLoading } =
     useContext(AuthContext);
 
   const getProductDetail = async (id) => {
@@ -151,7 +151,6 @@ const ProductDetail = ({ navigation, route }) => {
               style={{ ...styles.offerCard, backgroundColor: `${primaryColor}80` }}
               onPress={() => setModalVisible(!modalVisible)}
             >
-              {console.log("calll +++")}
               <View style={{ ...styles.offerDetail }}>
                 <Entypo name="price-tag" size={24} color={textColor} />
                 <View>
@@ -236,6 +235,7 @@ const ProductDetail = ({ navigation, route }) => {
                       borderBottomLeftRadius: 10,
                       marginLeft: -1,
                     }}
+                    disabled={cartLoading}
                     onPress={() =>
                       cartData?.qty === 1 ? removeCartItem(productDetail) : removeQty(productDetail)
                     }
@@ -255,7 +255,7 @@ const ProductDetail = ({ navigation, route }) => {
                       borderBottomRightRadius: 10,
                       marginRight: -1,
                     }}
-                    disabled={cartData?.quantity === cartData?.qty}
+                    disabled={cartLoading}
                     onPress={() => addQty(productDetail)}
                   >
                     <Feather name="plus" size={24} color={"#FFF"} />

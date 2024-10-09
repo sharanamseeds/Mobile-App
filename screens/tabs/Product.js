@@ -43,7 +43,7 @@ const Product = ({ navigation, route }) => {
   });
 
   const { cartItem } = useSelector((state) => state?.cartItem);
-  const { loading, showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem } = useContext(AuthContext);
+  const { loading, showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem, cartLoading } = useContext(AuthContext);
   const screenHeight = Dimensions.get("window").height;
   // theme color
   const textColor = useThemeColor({}, "text");
@@ -174,6 +174,7 @@ const Product = ({ navigation, route }) => {
                         borderBottomLeftRadius: 10,
                         marginLeft: -1,
                       }}
+                      disabled={cartLoading}
                       onPress={() =>
                         checkItemInCart(item?._id)?.qty === 1
                           ? removeCartItem(item)
@@ -197,7 +198,7 @@ const Product = ({ navigation, route }) => {
                         borderBottomRightRadius: 10,
                         marginRight: -1,
                       }}
-                      disabled={checkOutOfStock(item?.quantity, item?._id)}
+                      disabled={cartLoading}
                       onPress={() => addQty(item)}
                     >
                       <Feather name="plus" size={24} color={"#FFF"} />

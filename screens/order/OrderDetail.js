@@ -201,8 +201,9 @@ const OrderDetail = ({ navigation, route }) => {
                 flexDirection: "row",
                 justifyContent: "center",
                 alignItems: "center",
+                opacity: orderDetail?.is_retuned ? 0.5 : 1
               }}
-              disabled={orderDetail?.is_returned}
+              disabled={orderDetail?.is_retuned}
               onPress={() => returnOrder(orderDetail?._id)}
             >
               <Text

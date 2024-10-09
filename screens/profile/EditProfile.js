@@ -69,7 +69,6 @@ const ProfileEdit = () => {
     } = formDetail;
 
     if (!name) {
-      console.log("in if")
       errors = { ...errors, name: "please enter name" };
       isError = true;
     } else {

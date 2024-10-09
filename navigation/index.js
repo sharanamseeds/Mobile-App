@@ -443,7 +443,7 @@ const setCartItems = async() => {
     let cartData = []
     if (response.data?.payload?.result?.data?.length > 0) {
       response.data?.payload?.result?.data?.map((cart, index) => {
-        cartData.push({_id: cart?.product_id, ...cart.product, qty: cart?.quantity, selectedOffer: cart?.selectedOffer, cart_id: cart?._id})
+        cartData.push({_id: cart?.product_id, ...cart.product, qty: cart?.quantity, selectedOffer: cart?.selectedOffer || null, cart_id: cart?._id})
       })
     }
     return cartData

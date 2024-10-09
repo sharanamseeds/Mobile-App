@@ -30,7 +30,7 @@ const MyCart = ({ navigation }) => {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState({});
-  const { addQty, removeQty, removeCartItem, addOffer, removeOffer } = useContext(AuthContext);
+  const { addQty, removeQty, removeCartItem, addOffer, removeOffer, cartLoading } = useContext(AuthContext);
   const { cartItem } = useSelector((state) => state?.cartItem);
 
   // theme color
@@ -154,6 +154,7 @@ const MyCart = ({ navigation }) => {
                               borderBottomLeftRadius: 10,
                               marginLeft: -1,
                             }}
+                            disabled={cartLoading}
                             onPress={() =>
                               item?.qty === 1 ? removeCartItem(item) : removeQty(item)
                             }
@@ -173,7 +174,7 @@ const MyCart = ({ navigation }) => {
                               borderBottomRightRadius: 10,
                               marginRight: -1,
                             }}
-                            disabled={item?.quantity === item?.qty}
+                            disabled={cartLoading}
                             onPress={() => addQty(item)}
                           >
                             <Feather name="plus" size={24} color={"#FFF"} />

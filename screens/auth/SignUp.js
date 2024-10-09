@@ -20,56 +20,66 @@ const SignUp = ({ navigation }) => {
   const { showLoader, hideLoader } = useContext(AuthContext);
 
   const [formDetail, setFormDetail] = useState({});
-  const [error, setError] = useState({})
+  const [error, setError] = useState({});
 
   const handleChange = (name, value) => {
     setFormDetail({ ...formDetail, [name]: value });
   };
 
   const validate = () => {
-    let isError = false
-    let errors = {}
-    
-    const {name, email, password} = formDetail
+    let isError = false;
+    let errors = {};
+
+    const { name, email, password, agro_name } = formDetail;
 
     if (!name) {
-      errors = {...errors, "name": 'please enter name'}
-      isError = true
+      errors = { ...errors, name: "please enter name" };
+      isError = true;
     } else {
-      errors = {...errors, "name": ''}
+      errors = { ...errors, name: "" };
+    }
+    if (!agro_name) {
+      errors = { ...errors, agro_name: "please enter agro name" };
+      isError = true;
+    } else {
+      errors = { ...errors, agro_name: "" };
     }
     if (!email) {
-      errors = {...errors, "email": "please enter email"}
-      isError = true
+      errors = { ...errors, email: "please enter email" };
+      isError = true;
     } else {
-      errors = {...errors, "email": ""}
+      errors = { ...errors, email: "" };
     }
     if (!password) {
-      errors = {...errors, "password": "please enter password"}
-      isError = true
+      errors = { ...errors, password: "please enter password" };
+      isError = true;
     } else {
-      errors = {...errors, "password": ""}
+      errors = { ...errors, password: "" };
     }
 
-    setError(errors)
-    return isError
-  }
+    setError(errors);
+    return isError;
+  };
 
-  const registerUser = async() => {
-    if(!validate()){
+  const registerUser = async () => {
+    if (!validate()) {
       try {
-        showLoader()
-        const result = await axios.post(REGISTER, {...formDetail, confirm_password: formDetail?.password, gst_number: "2412dr2t1reqwer"})
-        ShowSuccessToast(result?.data?.message)
-        hideLoader()
-      } catch(error) {
-        ShowErrorToast(error?.response?.data?.message)
-        console.log(error?.response?.data)
-        hideLoader()
+        showLoader();
+        const result = await axios.post(REGISTER, {
+          ...formDetail,
+          confirm_password: formDetail?.password,
+        });
+        ShowSuccessToast(result?.data?.message);
+        navigation.navigate("Login")
+        hideLoader();
+      } catch (error) {
+        ShowErrorToast(error?.response?.data?.message);
+        console.log(error?.response?.data);
+        hideLoader();
       }
     }
-  }
- 
+  };
+
   return (
     <ThemeSafeAreaView>
       <ThemedView style={styles.topContainer}>
@@ -82,14 +92,14 @@ const SignUp = ({ navigation }) => {
       </ThemedView>
       <ThemedView style={styles.bottomContainer}>
         <ThemedText style={{ ...styles.title, color: primaryColor, fontFamily: "PoppinsBold" }}>
-          {i18n.t('create')},
+          {i18n.t("create")},
         </ThemedText>
         <ThemedText style={{ ...styles.subtitle, color: subTitleColor }}>
-         {i18n.t('discover')},
+          {i18n.t("discover")},
         </ThemedText>
 
         <FloatingInput
-          label={i18n.t('name')}
+          label={i18n.t("name")}
           name={"name"}
           formDetail={formDetail}
           handleChange={handleChange}
@@ -97,7 +107,15 @@ const SignUp = ({ navigation }) => {
         />
 
         <FloatingInput
-          label={i18n.t('email')}
+          label={i18n.t("agro_name")}
+          name={"agro_name"}
+          formDetail={formDetail}
+          handleChange={handleChange}
+          error={error?.agro_name}
+        />
+
+        <FloatingInput
+          label={i18n.t("email")}
           name={"email"}
           formDetail={formDetail}
           handleChange={handleChange}
@@ -105,19 +123,21 @@ const SignUp = ({ navigation }) => {
         />
 
         <FloatingPasswordInput
-          label={i18n.t('password')}
+          label={i18n.t("password")}
           name={"password"}
           formDetail={formDetail}
           handleChange={handleChange}
           error={error?.password}
         />
 
-        <ButtonPrimary title={i18n.t('sign_up')} handlePress={registerUser}/>
+        <ButtonPrimary title={i18n.t("sign_up")} handlePress={registerUser} />
 
         <ThemedView style={styles.signupContainer}>
-          <ThemedText>{i18n.t('already_member')}? </ThemedText>
+          <ThemedText>{i18n.t("already_member")}? </ThemedText>
           <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-            <ThemedText style={{ ...styles.signupText, color: primaryColor }}>{i18n.t('sign_in')}</ThemedText>
+            <ThemedText style={{ ...styles.signupText, color: primaryColor }}>
+              {i18n.t("sign_in")}
+            </ThemedText>
           </TouchableOpacity>
         </ThemedView>
       </ThemedView>

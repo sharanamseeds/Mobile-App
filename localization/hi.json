@@ -95,5 +95,6 @@
   "order_amount": "आदेश राशि",
   "product_not_found": "उत्पाद नहीं मिला",
   "view_offer": "ऑफर देखें",
-  "search_by_invoice": "चालान द्वारा खोजें..."
+  "search_by_invoice": "चालान द्वारा खोजें...",
+  "agro_name": "एग्रो नाम"
 }
