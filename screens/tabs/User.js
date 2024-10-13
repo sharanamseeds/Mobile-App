@@ -83,6 +83,13 @@ const User = ({ navigation }) => {
     }
   };
 
+  const reloadData = () => {
+    getUserDetail();
+    navigation.setOptions({
+      title: i18n.t('profile'),
+    });
+  }
+
   useEffect(() => {
     getUserDetail();
     navigation.setOptions({
@@ -91,7 +98,7 @@ const User = ({ navigation }) => {
   }, [i18n.locale]);
 
   return (
-    <ThemeSafeAreaView>
+    <ThemeSafeAreaView onReload={reloadData}>
       <ThemedView>
         <View style={styles.imageBox}>
           <View style={{ position: "relative" }}>

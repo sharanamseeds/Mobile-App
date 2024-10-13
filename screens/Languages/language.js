@@ -27,7 +27,7 @@ const Language = ({navigation}) => {
     },
   ];
   return (
-    <ThemeSafeAreaView style={{ paddingHorizontal: 15 }}>
+    <ThemeSafeAreaView style={{ paddingHorizontal: 15 }} isReloadable={false}>
       <ThemedView style={{ marginTop: 20 }}>
         <View style={styles.centeredView}>
           <View

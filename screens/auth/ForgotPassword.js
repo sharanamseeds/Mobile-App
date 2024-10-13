@@ -99,12 +99,12 @@ const ForgotPassword = ({ navigation }) => {
         const response = await axios.post(SENDVERIFICATIONCODE, { email: formDetail?.email });
         ShowSuccessToast(response.data?.message);
         setShowVerificationCode(true);
-        setTime(180);
+        setTime(90);
         hideLoader();
       } catch (error) {
         ShowErrorToast(error?.response?.data?.message);
         hideLoader();
-        console.log(error);
+        console.log(error?.response?.data?.message);
       }
     }
   };
@@ -179,7 +179,7 @@ const ForgotPassword = ({ navigation }) => {
   }, [time]);
 
   return (
-    <ThemeSafeAreaView>
+    <ThemeSafeAreaView isReloadable={false}>
       <ThemedView style={styles.topContainer}>
         <Image
           style={styles.image}

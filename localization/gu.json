@@ -96,5 +96,17 @@
   "product_not_found": "ઉત્પાદન મળ્યું નથી",
   "view_offer": "ઓફર જુઓ",
   "search_by_invoice": "ઇન્વોઇસ દ્વારા શોધો...",
-  "agro_name": "એગ્રો નામ"
+  "agro_name": "એગ્રો નામ",
+  "bank_detail": "બેંક વિગતો",
+  "account_name": "એકાઉન્ટ નામ",
+  "account_no": "ખાતા નં.",
+  "ifsc_code": "IFSC",
+  "total_money_added": "કુલ નાણાં ઉમેર્યા",
+  "total_ledger_credit": "કુલ લેજર ક્રેડિટ",
+  "total_ledger_debit": "કુલ લેજર ડેબિટ",
+  "final_balance": "કુલ બેલેન્સ",
+  "cancel_order": "ઓર્ડર રદ કરો",
+  "reason": "કારણ",
+  "return_order": "પરત ઓર્ડર",
+  "download_bill": "બિલ ડાઉનલોડ કરો"
 }

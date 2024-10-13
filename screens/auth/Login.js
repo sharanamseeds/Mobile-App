@@ -86,7 +86,7 @@ const Login = ({ navigation }) => {
   }, [])
 
   return (
-    <ThemeSafeAreaView>
+    <ThemeSafeAreaView isReloadable={false}>
       <ThemedView style={styles.topContainer}>
         <Image
           style={styles.image}

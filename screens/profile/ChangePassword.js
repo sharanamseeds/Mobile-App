@@ -57,7 +57,7 @@ const ChangePassword = () => {
   };
 
   return (
-    <ThemeSafeAreaView style={{ paddingHorizontal: 15, marginTop: 15 }}>
+    <ThemeSafeAreaView style={{ paddingHorizontal: 15, marginTop: 15 }} isReloadable={false}>
       <ThemedView>
         <FloatingInput
           label={i18n.t('new_password')}

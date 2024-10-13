@@ -89,10 +89,10 @@ const Home = ({ navigation }) => {
           style={styles.image}
         />
         <View style={styles.textContainer}>
-          <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600 }}>
+          <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600, fontFamily: 'PoppinsBold' }}>
             {item?.product_name}
           </ThemedText>
-          <ThemedText style={styles.price}>₹ {item?.price}</ThemedText>
+          <ThemedText style={{...styles.price, fontWeight: 600, fontFamily: 'PoppinsBold'}}>₹ {item?.price_with_gst}</ThemedText>
         </View>
       </TouchableOpacity>
     );
@@ -146,6 +146,16 @@ const Home = ({ navigation }) => {
     }
   };
 
+  const pageReload = () => {
+    getCategories();
+    getBrands();
+    getFeatureProduct();
+    getBanner();
+    navigation.setOptions({
+      title: i18n.t('home'),
+    });
+  }
+
   useEffect(() => {
     getCategories();
     getBrands();
@@ -158,7 +168,7 @@ const Home = ({ navigation }) => {
 
   return (
     <>
-      <ThemeSafeAreaView>
+      <ThemeSafeAreaView onReload={pageReload}>
         {CarouselData?.length > 0 && (
           <ThemedView>
             <Carousel
@@ -269,8 +279,9 @@ const Home = ({ navigation }) => {
               height={350}
               autoPlay={true}
               data={bannerData}
-              autoPlayInterval={5000}
+              autoPlayInterval={2000}
               scrollAnimationDuration={1000}
+              enabled={false}
               renderItem={({ item, index }) => (
                 <ThemedView
                   style={{

@@ -2,12 +2,12 @@ import { FloatingLabelInput } from "react-native-floating-label-input";
 import { useThemeColor } from "../hook/useThemeColor";
 import { Text, View } from "react-native";
 
-const FloatingInput = ({ label, name, formDetail, handleChange, error }) => {
+const FloatingInput = ({ label, name, formDetail, handleChange, error, labelStyles, style }) => {
   const primaryColor = useThemeColor({}, "primary");
   const textColor = useThemeColor({}, "text");
   const bgColor = useThemeColor({}, "background");
   return (
-    <View>
+    <View style={{...style}}>
       <FloatingLabelInput
         label={label}
         value={formDetail[name] || ""}
@@ -17,7 +17,7 @@ const FloatingInput = ({ label, name, formDetail, handleChange, error }) => {
           height: 55,
           borderRadius: 8,
           paddingHorizontal: 10,
-          borderColor: error ? '#FF9494' : primaryColor,
+          borderColor: error ? '#FF9494' : primaryColor
         }}
         customLabelStyles={{
           colorFocused: error ? '#FF9494' : textColor,
@@ -27,9 +27,10 @@ const FloatingInput = ({ label, name, formDetail, handleChange, error }) => {
         labelStyles={{
           backgroundColor: bgColor,
           color: textColor,
+          ...labelStyles,
         }}
         inputStyles={{
-          color: textColor,
+          color: textColor
         }}
         onChangeText={(val) => handleChange(name, val)}
       />

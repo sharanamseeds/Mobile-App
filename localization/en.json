@@ -96,5 +96,17 @@
     "product_not_found": "Product Not Found",
     "view_offer": "View Offer",
     "search_by_invoice": "search by invoice...",
-    "agro_name": "Agro Name"
+    "agro_name": "Agro Name",
+    "bank_detail": "Bank Detail",
+    "account_name": "Account Name",
+    "account_no": "Account No.",
+    "ifsc_code": "IFSC",
+    "total_money_added": "Total Money Added",
+    "total_ledger_credit": "Total Ledger Credit",
+    "total_ledger_debit": "Total Ledger Debit",
+    "final_balance": "Total Balance",
+    "cancel_order": "Order Cancel",
+    "reason": "Reason",
+    "return_order": "Return Order",
+    "download_bill": "Download Bill"
 }

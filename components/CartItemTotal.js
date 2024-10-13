@@ -40,7 +40,7 @@ const CartItemTotal = ({ navigation }) => {
       }}
     >
       <View>
-        <Text style={{ fontSize: 20, fontWeight: 600, color: "#FFF", fontFamily: "Poppins" }}>
+        <Text style={{ fontSize: 20, fontWeight: 600, color: "#FFF", fontFamily: "PoppinsBold" }}>
         ₹ {billingAmount?.toFixed(2)}
         </Text>
         <Text

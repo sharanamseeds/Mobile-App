@@ -96,5 +96,17 @@
   "product_not_found": "उत्पाद नहीं मिला",
   "view_offer": "ऑफर देखें",
   "search_by_invoice": "चालान द्वारा खोजें...",
-  "agro_name": "एग्रो नाम"
+  "agro_name": "एग्रो नाम",
+  "bank_detail": "बैंक का विवरण",
+  "account_name": "खाता नाम",
+  "account_no": "खाता नंबर",
+  "ifsc_code": "आईएफएससी",
+  "total_money_added": "कुल जोड़ा गया पैसा",
+  "total_ledger_credit": "कुल खाता बही क्रेडिट",
+  "total_ledger_debit": "कुल बही डेबिट",
+  "final_balance": "कुल शेष",
+  "cancel_order": "आदेश रद्द करें",
+  "reason": "कारण",
+  "return_order": "वापसी आदेश",
+  "download_bill": "बिल डाउनलोड करें"
 }

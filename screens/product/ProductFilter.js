@@ -109,11 +109,11 @@ const ProductFilter = ({ navigation, route }) => {
               <TouchableOpacity
                 onPress={() => navigation.navigate("ProductDetail", { pid: item._id })}
               >
-                <ThemedText style={{ ...styles.title }}>{item?.product_name}</ThemedText>
+                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold' }}>{item?.product_name}</ThemedText>
                 <ThemedText style={{ ...styles.price, marginTop: -2 }}>
                   {item?.product_code}
                 </ThemedText>
-                <ThemedText style={{ ...styles.title }}>₹ {item?.price}</ThemedText>
+                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold' }}>₹ {item?.price_with_gst}</ThemedText>
               </TouchableOpacity>
             </View>
             <View style={styles.cardButton}>

@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import ThemeSafeAreaView from "../../components/ThemeSafeAreaView";
 import { ThemedView } from "../../components/ThemedView";
 import { useThemeColor } from "../../hook/useThemeColor";
 import { Feather } from "@expo/vector-icons";
@@ -86,6 +85,7 @@ const Ledger = ({ navigation }) => {
   const renderLedger = ({ item, index }) => {
     return (
       <View style={styles.transaction} key={index}>
+        {console.log(item?.bill)}
         <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
           <View
             style={{
@@ -118,7 +118,6 @@ const Ledger = ({ navigation }) => {
               fontSize: 18,
             }}
           >
-            {" "}
             {item?.type === "credit" ? "+" : "-"}
             {item?.payment_amount}
           </ThemedText>
@@ -139,6 +138,11 @@ const Ledger = ({ navigation }) => {
     debouncedFetchResults(text);
   };
 
+  const reloadData = () => {
+    fetchLedger();
+    fetchLedgerList();
+  };
+
   useEffect(() => {
     fetchLedger();
   }, [i18n.locale]);
@@ -155,134 +159,160 @@ const Ledger = ({ navigation }) => {
 
   return (
     <ThemeSafeAreaViewWOS>
-      <ThemedView
-        style={{
-          paddingHorizontal: 15,
-          borderBottomColor: "grey",
-          borderBottomWidth: 2,
-          paddingBottom: 15,
-        }}
-      >
-        <View>
-          <ThemedText style={{ fontSize: 16 }}>{i18n.t("total_outstanding")}</ThemedText>
-          <ThemedText style={{ fontSize: 22, fontWeight: 600, marginTop: 8 }}>
-            ₹ {ledgerData?.finalBalance}
-          </ThemedText>
-          {/* <TouchableOpacity
-            style={{ backgroundColor: primaryColor, borderRadius: 10, padding: 10, marginTop: 20 }}
-          >
-            <ThemedText
+      <FlatList
+        nestedScrollEnabled={true}
+        scrollEnabled={true}
+        data={ledgerList}
+        keyExtractor={(item) => item?._id}
+        showsVerticalScrollIndicator={false}
+        renderItem={renderLedger}
+        ListHeaderComponent={
+          <>
+            <ThemedView
               style={{
-                textAlign: "center",
-                color: "#FFF",
-                fontSize: 18,
-                fontWeight: 600,
-                fontFamily: "Poppins",
+                paddingHorizontal: 15,
+                borderBottomColor: "grey",
+                borderBottomWidth: 2,
+                paddingBottom: 5,
               }}
             >
-              Make Payment
-            </ThemedText>
-          </TouchableOpacity>
-          <ThemedText style={{ color: primaryColor, textAlign: "center", marginTop: 10 }}>
-            Pay by Bank deposite, New banking & UPI
-          </ThemedText> */}
-        </View>
-      </ThemedView>
-      <ThemedView
-        style={{
-          paddingHorizontal: 15,
-          borderTopColor: "grey",
-          borderTopWidth: 2,
-          paddingTop: 15,
-          borderBottomColor: "grey",
-          borderBottomWidth: 2,
-          paddingBottom: 15,
-          marginTop: 1,
-          marginBottom: 1,
-        }}
-      >
-        <View>
-          <ThemedText style={{ fontSize: 16 }}>{i18n.t("available_credit_limit")}</ThemedText>
-          <ThemedText style={{ fontSize: 22, fontWeight: 600, marginTop: 8 }}>
-            ₹ {ledgerData?.totalMoneyAdded}
-          </ThemedText>
-        </View>
-      </ThemedView>
-      <ThemedView
-        style={{
-          paddingHorizontal: 15,
-          borderTopColor: "grey",
-          borderTopWidth: 2,
-          paddingTop: 15,
-          marginBottom: 12,
-        }}
-      >
-        <ThemedText style={{ fontSize: 18, marginBottom: 5 }}>
-          {i18n.t("all_transaction_list")}
-        </ThemedText>
-        <ThemedView
-          style={{
-            flexDirection: "row",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
-          <SearchBar
-            placeholder={i18n.t("search_by_invoice")}
-            round={true}
-            containerStyle={{
-              backgroundColor: background,
-              borderWidth: 0,
-              borderColor: background,
-              width: "84%",
-              padding: 0,
-            }}
-            inputContainerStyle={{
-              backgroundColor: "transparent",
-              borderColor: primaryColor,
-              borderWidth: 2,
-              borderBottomColor: primaryColor,
-              borderBottomWidth: 2,
-              borderRadius: 50,
-            }}
-            searchIcon={() => <Feather name="search" size={24} color={textColor} />}
-            onChangeText={(e) => handleInputChange(e)}
-            value={search}
-          />
-          <TouchableOpacity
-            style={{
-              width: 45,
-              paddingHorizontal: 10,
-              height: 45,
-              flexDirection: "column",
-              justifyContent: "center",
-              borderRadius: 10,
-              paddingVertical: 2,
-              borderColor: primaryColor,
-              borderWidth: 2,
-            }}
-            onPress={() => setModalVisible(true)}
-          >
-            <Feather name="git-commit" size={20} color={textColor} />
-            <Feather name="git-commit" size={20} color={textColor} style={{ marginTop: -10 }} />
-          </TouchableOpacity>
-        </ThemedView>
-        <FlatList
-          nestedScrollEnabled={true}
-          scrollEnabled={true}
-          data={ledgerList}
-          keyExtractor={(item) => item?._id}
-          showsVerticalScrollIndicator={false}
-          renderItem={renderLedger}
-          //ListFooterComponent={renderFooter}
-          onEndReached={() => fetchLedgerList()}
-          onEndReachedThreshold={0.5}
-          initialNumToRender={10}
-          maxToRenderPerBatch={5}
-          windowSize={10}
-          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchLedgerList} />}
-        />
-      </ThemedView>
+              <View>
+                <ThemedText style={{ fontSize: 16 }}>{i18n.t("bank_detail")}</ThemedText>
+                <ThemedText style={{ fontSize: 15, fontWeight: 600 }}>
+                  {i18n.t("account_name")} : SHARNAM SEEDS
+                </ThemedText>
+                <ThemedText style={{ fontSize: 15, fontWeight: 600 }}>
+                  {i18n.t("account_no")} : 923020023452363
+                </ThemedText>
+                <ThemedText style={{ fontSize: 15, fontWeight: 600 }}>
+                  {i18n.t("ifsc_code")} : UTIB0004734
+                </ThemedText>
+              </View>
+            </ThemedView>
+            <ThemedView
+              style={{
+                paddingHorizontal: 15,              
+                paddingVertical: 5,
+                marginTop: 1,
+                marginBottom: 1,
+              }}
+            >
+              {console.log(ledgerData, "led")}
+              <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{width: "50%"}}>
+                  <ThemedText style={{ fontSize: 14 }}>{i18n.t("total_money_added")}</ThemedText>
+                  <ThemedText style={{ fontSize: 16, fontWeight: 600, fontFamily: "PoppinsBold" }}>
+                    ₹ {ledgerData?.totalMoneyAdded}
+                  </ThemedText>
+                </View>
+                <View style={{width: "50%"}}>
+                  <ThemedText style={{ fontSize: 14 }}>{i18n.t("total_ledger_credit")}</ThemedText>
+                  <ThemedText style={{ fontSize: 16, fontWeight: 600, fontFamily: "PoppinsBold" }}>
+                    ₹ {ledgerData?.totalCredit}
+                  </ThemedText>
+                </View>
+              </View>
+            </ThemedView>
+            <ThemedView
+              style={{
+                paddingHorizontal: 15,
+                paddingVertical: 5,
+                borderBottomColor: "grey",
+                borderBottomWidth: 2,
+                marginTop: 1,
+                marginBottom: 1,
+              }}
+            >
+             <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
+                <View style={{width: "50%"}}>
+                  <ThemedText style={{ fontSize: 14 }}>{i18n.t("total_ledger_debit")}</ThemedText>
+                  <ThemedText style={{ fontSize: 16, fontWeight: 600, fontFamily: "PoppinsBold" }}>
+                    ₹ {ledgerData?.totalDebit}
+                  </ThemedText>
+                </View>
+                <View style={{width: "50%"}}>
+                  <ThemedText style={{ fontSize: 14 }}>{i18n.t("final_balance")}</ThemedText>
+                  <ThemedText style={{ fontSize: 16, fontWeight: 600, fontFamily: "PoppinsBold" }}>
+                    ₹ {ledgerData?.finalBalance}
+                  </ThemedText>
+                </View>
+              </View>
+            </ThemedView>
+            <ThemedView
+              style={{
+                paddingHorizontal: 15,
+                borderTopColor: "grey",
+                borderTopWidth: 2,
+                paddingTop: 15,
+                marginBottom: 12,
+              }}
+            >
+              <ThemedText style={{ fontSize: 18, marginBottom: 5 }}>
+                {i18n.t("all_transaction_list")}
+              </ThemedText>
+              <ThemedView
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <SearchBar
+                  placeholder={i18n.t("search_by_invoice")}
+                  round={true}
+                  containerStyle={{
+                    backgroundColor: background,
+                    borderWidth: 0,
+                    borderColor: background,
+                    width: "84%",
+                    padding: 0,
+                  }}
+                  inputContainerStyle={{
+                    backgroundColor: "transparent",
+                    borderColor: primaryColor,
+                    borderWidth: 2,
+                    borderBottomColor: primaryColor,
+                    borderBottomWidth: 2,
+                    borderRadius: 50,
+                  }}
+                  searchIcon={() => <Feather name="search" size={24} color={textColor} />}
+                  onChangeText={(e) => handleInputChange(e)}
+                  value={search}
+                />
+                <TouchableOpacity
+                  style={{
+                    width: 45,
+                    paddingHorizontal: 10,
+                    height: 45,
+                    flexDirection: "column",
+                    justifyContent: "center",
+                    borderRadius: 10,
+                    paddingVertical: 2,
+                    borderColor: primaryColor,
+                    borderWidth: 2,
+                  }}
+                  onPress={() => setModalVisible(true)}
+                >
+                  <Feather name="git-commit" size={20} color={textColor} />
+                  <Feather
+                    name="git-commit"
+                    size={20}
+                    color={textColor}
+                    style={{ marginTop: -10 }}
+                  />
+                </TouchableOpacity>
+              </ThemedView>
+            </ThemedView>
+          </>
+        }
+        //ListFooterComponent={renderFooter}
+        onEndReached={() => fetchLedgerList()}
+        onEndReachedThreshold={0.5}
+        initialNumToRender={10}
+        maxToRenderPerBatch={5}
+        windowSize={10}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={reloadData} />}
+      />
       <Modal
         animationType="slide"
         transparent={true}
@@ -399,6 +429,7 @@ const styles = StyleSheet.create({
     borderBottomColor: "grey",
     borderBottomWidth: 2,
     paddingVertical: 15,
+    marginHorizontal: 15,
   },
   modalView: {
     borderRadius: 20,

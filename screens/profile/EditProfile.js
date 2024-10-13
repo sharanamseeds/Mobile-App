@@ -205,7 +205,7 @@ const ProfileEdit = () => {
   }, []);
 
   return (
-    <ThemeSafeAreaView style={{ flex: 1, paddingHorizontal: 15 }}>
+    <ThemeSafeAreaView style={{ flex: 1, paddingHorizontal: 15 }} isReloadable={false}>
       <ThemedView style={{ flex:1, marginTop: 20, marginBottom: 60}}>
         <ScrollView showsVerticalScrollIndicator={false} style={{ height: screenHeight * 0.79 }}>
           <ThemedText style={{ marginBottom: 15 }}>{i18n.t('profile_detail')}</ThemedText>

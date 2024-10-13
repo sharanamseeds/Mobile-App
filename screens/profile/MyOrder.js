@@ -1,7 +1,6 @@
 import { useDispatch, useSelector } from "react-redux";
 import { ThemedText } from "../../components/ThemedText";
 import { ThemedView } from "../../components/ThemedView";
-import ThemeSafeAreaView from "../../components/ThemeSafeAreaView";
 import {
   ActivityIndicator,
   Dimensions,
@@ -16,7 +15,6 @@ import {
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useThemeColor } from "../../hook/useThemeColor";
-import { INC, DEC, DELITEM } from "../../redux/cart/CartSlice";
 import { useContext, useEffect, useState } from "react";
 import { AuthContext } from "../../context/authContext";
 import { ORDERLIST } from "../../constant/ApiRoutes";

@@ -85,7 +85,7 @@ const TabNav = ({ navigation }) => {
             <TouchableOpacity onPress={() => navigation.navigate("Language")}>
               <Feather
                 name="globe"
-                size={24}
+                size={23}
                 style={{
                   marginRight: 15,
                   marginBottom: 12,

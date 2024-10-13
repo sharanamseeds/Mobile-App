@@ -4,7 +4,7 @@ import axios from "axios";
 import { ADDTOCART, LOGIN } from "../constant/ApiRoutes";
 import { ShowErrorToast, ShowSuccessToast } from "../helper/helper";
 import i18n from "../i18n";
-import { ADDCART, DEC, DELITEM, INC } from "../redux/cart/CartSlice";
+import { ADDCART, DEC, DELITEM, INC, UPDATEQTY } from "../redux/cart/CartSlice";
 import { useDispatch, useSelector } from "react-redux";
 
 //create context
@@ -19,9 +19,9 @@ const AuthProvider = ({ children }) => {
   const [authLoading, setAuthLoading] = useState(null);
   const [userName, setUserName] = useState("");
   const [language, setLanguage] = useState(i18n.locale);
-  const [cartLoading, setCartLoading] = useState(false)
+  const [cartLoading, setCartLoading] = useState(false);
   const { cartItem } = useSelector((state) => state?.cartItem);
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
 
   const checkItemInCart = (id) => {
     if (cartItem && cartItem?.length > 0) {
@@ -89,6 +89,7 @@ const AuthProvider = ({ children }) => {
     //Token Remove, UserData Remove
     await AsyncStorage.removeItem("token");
     await AsyncStorage.removeItem("user_data");
+    await AsyncStorage.removeItem("refresh_token");
     setToken(null);
     setAuthLoading(false);
   };
@@ -119,20 +120,44 @@ const AuthProvider = ({ children }) => {
     }
   };
 
-  const addOffer = async (data) => {
+  const updateQty = async (val, id) => {
     try {
-      const cartItem = checkItemInCart(data?._id);
+      const requestData = {
+        _id: id,
+        qty: Number(val),
+      };
+
+      dispatch(
+        UPDATEQTY({
+          ...requestData,
+        })
+      );
+      
+      const cartItem = checkItemInCart(id);
       const request = {
-        selectedOffer: data?.selectedOffer,
+        quantity: val,
       };
 
       await axios.put(`${ADDTOCART}/${cartItem?.cart_id}?payload=${JSON.stringify(request)}`);
     } catch (error) {
-      console.log(error?.response?.data)
+      console.log(error);
+    }
+  };
+
+  const addOffer = async (data) => {
+    try {
+      const cartItem = checkItemInCart(data?._id);
+      const request = {
+        selectedOffer: data?.selectedOffer || null,
+      };
+
+      await axios.put(`${ADDTOCART}/${cartItem?.cart_id}?payload=${JSON.stringify(request)}`);
+    } catch (error) {
+      console.log(error?.response?.data);
       ShowErrorToast(error?.response?.data?.message);
       console.log(error);
     }
-  }
+  };
 
   const removeOffer = async (data) => {
     try {
@@ -143,15 +168,15 @@ const AuthProvider = ({ children }) => {
 
       await axios.put(`${ADDTOCART}/${cartItem?.cart_id}?payload=${JSON.stringify(request)}`);
     } catch (error) {
-      console.log(error?.response?.data)
+      console.log(error?.response?.data);
       ShowErrorToast(error?.response?.data?.message);
       console.log(error);
     }
-  }
+  };
 
   const addQty = async (data) => {
     try {
-      setCartLoading(true)
+      setCartLoading(true);
       const cartItem = checkItemInCart(data?._id);
       const request = {
         quantity: cartItem?.qty + 1,
@@ -159,17 +184,17 @@ const AuthProvider = ({ children }) => {
 
       await axios.put(`${ADDTOCART}/${cartItem?.cart_id}?payload=${JSON.stringify(request)}`);
       dispatch(INC(data));
-      setCartLoading(false)
+      setCartLoading(false);
     } catch (error) {
       ShowErrorToast(error?.response?.data?.message);
       console.log(error);
-      setCartLoading(false)
+      setCartLoading(false);
     }
   };
 
   const removeQty = async (data) => {
     try {
-      setCartLoading(true)
+      setCartLoading(true);
       const cartItem = checkItemInCart(data?._id);
       const request = {
         quantity: cartItem?.qty - 1,
@@ -177,11 +202,11 @@ const AuthProvider = ({ children }) => {
 
       await axios.put(`${ADDTOCART}/${cartItem?.cart_id}?payload=${JSON.stringify(request)}`);
       dispatch(DEC(data));
-      setCartLoading(false)
+      setCartLoading(false);
     } catch (error) {
       ShowErrorToast(error?.response?.data?.message);
       console.log(error);
-      setCartLoading(false)
+      setCartLoading(false);
     }
   };
 
@@ -225,7 +250,8 @@ const AuthProvider = ({ children }) => {
         removeCartItem,
         addOffer,
         removeOffer,
-        cartLoading
+        cartLoading,
+        updateQty,
       }}
     >
       {children}

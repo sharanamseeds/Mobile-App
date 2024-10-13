@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   useWindowDimensions,
   Alert,
+  Modal,
 } from "react-native";
 import ThemeSafeAreaView from "../../components/ThemeSafeAreaView";
 import { ThemedView } from "../../components/ThemedView";
@@ -14,7 +15,7 @@ import { ThemedText } from "../../components/ThemedText";
 import { useContext, useEffect, useState } from "react";
 import { Feather } from "@expo/vector-icons";
 import axios from "axios";
-import { DOWNLOADBILL, ORDERDETAIL, RETURNORDER } from "../../constant/ApiRoutes";
+import { DOWNLOADBILL, ORDER, ORDERDETAIL, RETURNORDER } from "../../constant/ApiRoutes";
 import { GetServerImage, ShowErrorToast, ShowSuccessToast } from "../../helper/helper";
 import { AuthContext } from "../../context/authContext";
 import moment from "moment";
@@ -22,6 +23,7 @@ import i18n from "../../i18n";
 import * as Print from "expo-print";
 import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
+import FloatingInput from "../../components/FloatingInput";
 
 const OrderDetail = ({ navigation, route }) => {
   // theme color
@@ -31,7 +33,15 @@ const OrderDetail = ({ navigation, route }) => {
   const secondaryColor = useThemeColor({}, "secondary");
   const { pid } = route.params;
   const [orderDetail, setOrderDetail] = useState([]);
+  const [showCancelModel, setShowCancelModel] = useState(false);
+  const [reason, setReason] = useState({
+    cancel: "",
+    return: ""
+  });
+  const [error, setError] = useState({})
+  const [showReturnModel, setShowReturnModel] = useState(false)
   const { showLoader, hideLoader } = useContext(AuthContext);
+  const textColor = useThemeColor({}, "text");
 
   const status = [
     {
@@ -128,19 +138,60 @@ const OrderDetail = ({ navigation, route }) => {
     }
   };
 
-  const returnOrder = async (order_id) => {
+  const returnOrder = async () => {
     try {
+      if (!reason?.return) {
+        setError({...error, "return": 'please enter reason'})
+        return
+      }
       showLoader();
       const result = await axios.post(
-        `${RETURNORDER}/${order_id}?payload=${JSON.stringify({ reason: "return" })}&lang_code=${i18n.locale}`
+        `${RETURNORDER}/${pid}?payload=${JSON.stringify({ reason: reason?.return })}&lang_code=${
+          i18n.locale
+        }`
       );
       ShowSuccessToast(result?.data?.message);
+      setShowReturnModel(false)
+      getOrderDetail(pid)
       hideLoader();
     } catch (error) {
       ShowErrorToast(error.response?.data?.message);
       hideLoader();
     }
   };
+
+  const cancelOrder = async () => {
+    try {
+      if (!reason?.cancel) {
+        setError({...error, "cancel": 'please enter reason'})
+        return
+      }
+      showLoader();
+      const result = await axios.put(
+        `${ORDER}/${pid}?payload=${JSON.stringify({reason: reason?.cancel, status: 'cancelled' })}&lang_code=${
+          i18n.locale
+        }`
+      );
+      ShowSuccessToast(result?.data?.message);
+      setShowCancelModel(false)
+      getOrderDetail(pid)
+      hideLoader();
+    } catch (error) {
+      console.log(error.response?.data)
+      ShowErrorToast(error.response?.data?.message);
+      hideLoader();
+    }
+  };
+
+  const reloadData = () => {
+    if (pid) {
+      getOrderDetail(pid);
+    }
+  };
+
+  const handleChange = (name, value) => {
+    setReason({[name]: value})
+  }
 
   useEffect(() => {
     console.log(pid);
@@ -151,7 +202,7 @@ const OrderDetail = ({ navigation, route }) => {
 
   return (
     <>
-      <ThemeSafeAreaView>
+      <ThemeSafeAreaView onReload={reloadData}>
         <ThemedView
           style={{
             paddingHorizontal: 15,
@@ -191,6 +242,32 @@ const OrderDetail = ({ navigation, route }) => {
               {status?.find((f) => f.value === orderDetail?.status)?.label}
             </ThemedText>
           </View>
+          {orderDetail?.status === "pending" && (
+            <TouchableOpacity
+              style={{
+                backgroundColor: "#FF3838",
+                padding: 8,
+                borderRadius: 50,
+                marginTop: 8,
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              onPress={() => setShowCancelModel(true)}
+            >
+              <Text
+                style={{
+                  color: "#FFF",
+                  textAlign: "center",
+                  fontSize: 18,
+                  textTransform: "uppercase",
+                }}
+              >
+                {i18n.t("cancel_order")}
+              </Text>
+              <Feather name="x-circle" color="#FFF" size={20} style={{ marginLeft: 5 }} />
+            </TouchableOpacity>
+          )}
           {orderDetail?.is_creditable && (
             <TouchableOpacity
               style={{
@@ -201,10 +278,10 @@ const OrderDetail = ({ navigation, route }) => {
                 flexDirection: "row",
                 justifyContent: "center",
                 alignItems: "center",
-                opacity: orderDetail?.is_retuned ? 0.5 : 1
+                opacity: orderDetail?.is_retuned ? 0.5 : 1,
               }}
               disabled={orderDetail?.is_retuned}
-              onPress={() => returnOrder(orderDetail?._id)}
+              onPress={() => setShowReturnModel(true)}
             >
               <Text
                 style={{
@@ -214,7 +291,7 @@ const OrderDetail = ({ navigation, route }) => {
                   textTransform: "uppercase",
                 }}
               >
-                Return Order
+                {i18n.t('return_order')}
               </Text>
               <Feather name="repeat" color="#FFF" size={20} style={{ marginLeft: 5 }} />
             </TouchableOpacity>
@@ -240,7 +317,7 @@ const OrderDetail = ({ navigation, route }) => {
                   textTransform: "uppercase",
                 }}
               >
-                Download Bill
+                {i18n.t('download_bill')}
               </Text>
               <Feather name="download" color="#FFF" size={20} style={{ marginLeft: 5 }} />
             </TouchableOpacity>
@@ -287,11 +364,17 @@ const OrderDetail = ({ navigation, route }) => {
                       <TouchableOpacity
                         onPress={() => navigation.navigate("ProductDetail", { pid: item._id })}
                       >
-                        <ThemedText style={{ ...styles.title }}>{item?.product_name}</ThemedText>
+                        <ThemedText
+                          style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold" }}
+                        >
+                          {item?.product_name}
+                        </ThemedText>
                         <ThemedText style={{ ...styles.price, marginTop: -2 }}>
                           {item?.product_code}
                         </ThemedText>
-                        <ThemedText style={{ ...styles.title }}>
+                        <ThemedText
+                          style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold" }}
+                        >
                           ₹ {item?.total_amount?.toFixed(2)}
                         </ThemedText>
                       </TouchableOpacity>
@@ -349,6 +432,128 @@ const OrderDetail = ({ navigation, route }) => {
               </ThemedView>
             ))}
         </ThemedView>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showCancelModel}
+          onRequestClose={() => {
+            setShowCancelModel(!showCancelModel);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View
+              style={{
+                ...styles.modalView,
+                backgroundColor: boxColor,
+                shadowColor: boxShadow,
+                height: "35%",
+              }}
+            >
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <Text style={{ color: textColor, fontSize: 20, fontWeight: 600 }}>
+                  {i18n.t("cancel_order")}
+                </Text>
+                <Feather
+                  name="x"
+                  size={22}
+                  style={{ marginTop: 8 }}
+                  color={textColor}
+                  onPress={() => setShowCancelModel(!showCancelModel)}
+                />
+              </View>
+
+              <FloatingInput
+                label={i18n.t("reason")}
+                name={"cancel"}
+                formDetail={reason}
+                handleChange={handleChange}
+                error={error?.cancel}
+                labelStyles={{backgroundColor: boxColor}}
+                style={{marginTop: 20}}
+              />
+
+              <TouchableOpacity
+                style={{
+                  flexDirection: "row",
+                  backgroundColor: secondaryColor,
+                  width: "100%",
+                  padding: 10,
+                  borderRadius: 50,
+                  marginTop: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onPress={() => cancelOrder()}
+              >
+                <Feather name="x-circle" size={18} color={"#FFF"} />
+                <Text style={{ color: "#FFF", marginLeft: 5, fontSize: 18 }}>
+                  {i18n.t("cancel_order")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={showReturnModel}
+          onRequestClose={() => {
+            setShowReturnModel(!showReturnModel);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View
+              style={{
+                ...styles.modalView,
+                backgroundColor: boxColor,
+                shadowColor: boxShadow,
+                height: "35%",
+              }}
+            >
+              <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <Text style={{ color: textColor, fontSize: 20, fontWeight: 600 }}>
+                  {i18n.t("return_order")}
+                </Text>
+                <Feather
+                  name="x"
+                  size={22}
+                  style={{ marginTop: 8 }}
+                  color={textColor}
+                  onPress={() => setShowReturnModel(!showReturnModel)}
+                />
+              </View>
+
+              <FloatingInput
+                label={i18n.t("reason")}
+                name={"return"}
+                formDetail={reason}
+                handleChange={handleChange}
+                error={error?.return}
+                labelStyles={{backgroundColor: boxColor}}
+                style={{marginTop: 20}}
+              />
+
+              <TouchableOpacity
+                style={{
+                  flexDirection: "row",
+                  backgroundColor: secondaryColor,
+                  width: "100%",
+                  padding: 10,
+                  borderRadius: 50,
+                  marginTop: 10,
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                onPress={() => returnOrder()}
+              >
+                <Feather name="repeat" size={18} color={"#FFF"} />
+                <Text style={{ color: "#FFF", marginLeft: 5, fontSize: 18 }}>
+                  {i18n.t("return_order")}
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
       </ThemeSafeAreaView>
     </>
   );
@@ -434,5 +639,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
+  },
+  modalView: {
+    borderRadius: 20,
+    paddingHorizontal: 15,
+    paddingVertical: 20,
+    bottom: 0,
+    position: "relative",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+    height: "60%",
+  },
+  centeredView: {
+    flex: 1,
+    justifyContent: "flex-end",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
   },
 });

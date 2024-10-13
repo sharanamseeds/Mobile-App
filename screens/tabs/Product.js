@@ -15,10 +15,11 @@ import {
   ActivityIndicator,
   RefreshControl,
   Dimensions,
+  TextInput,
 } from "react-native";
 import { ThemedText } from "../../components/ThemedText";
 import ThemeSafeAreaViewWOS from "../../components/ThemeSafeAreaViewWOS";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import CartItemTotal from "../../components/CartItemTotal";
 import axios from "axios";
 import { BRANDLIST, CATEGORYLIST, PRODUCTLIST } from "../../constant/ApiRoutes";
@@ -43,7 +44,7 @@ const Product = ({ navigation, route }) => {
   });
 
   const { cartItem } = useSelector((state) => state?.cartItem);
-  const { loading, showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem, cartLoading } = useContext(AuthContext);
+  const { loading, showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem, cartLoading, updateQty } = useContext(AuthContext);
   const screenHeight = Dimensions.get("window").height;
   // theme color
   const textColor = useThemeColor({}, "text");
@@ -107,6 +108,10 @@ const Product = ({ navigation, route }) => {
     );
   };
 
+  const handleQtyChange = async(val, id) => {
+    await updateQty(val, id)
+  }
+
   const renderProduct = ({ item, index }) => {
     return (
       <ThemedView
@@ -131,11 +136,11 @@ const Product = ({ navigation, route }) => {
               <TouchableOpacity
                 onPress={() => navigation.navigate("ProductDetail", { pid: item._id })}
               >
-                <ThemedText style={{ ...styles.title }}>{item?.product_name}</ThemedText>
+                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold' }}>{item?.product_name}</ThemedText>
                 <ThemedText style={{ ...styles.price, marginTop: -2 }}>
                   {item?.product_code}
                 </ThemedText>
-                <ThemedText style={{ ...styles.title }}>₹ {item?.price}</ThemedText>
+                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold' }}>₹ {item?.price_with_gst}</ThemedText>
               </TouchableOpacity>
             </View>
             {item?.in_stock ? (
@@ -187,9 +192,10 @@ const Product = ({ navigation, route }) => {
                         color={"#FFF"}
                       />
                     </TouchableOpacity>
-                    <Text style={{ backgroundColor: "#FFF", fontSize: 18 }}>
+                    <TextInput onChangeText={(val) => handleQtyChange(val, item?._id)} style={{fontSize: 18}} value={checkItemInCart(item?._id)?.qty?.toString()} maxLength={5} keyboardType="numeric"/>
+                    {/* <Text style={{ backgroundColor: "#FFF", fontSize: 18 }}>
                       {checkItemInCart(item?._id)?.qty}
-                    </Text>
+                    </Text> */}
                     <TouchableOpacity
                       style={{
                         ...styles.cartButton,

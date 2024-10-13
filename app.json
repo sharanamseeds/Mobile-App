@@ -23,7 +23,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.ravi0110.agro_apk",
-      "usesCleartextTraffic": true
+      "usesCleartextTraffic": true,
+      "flagSecure": false
     },
     "web": {
       "favicon": "./assets/logo512.png"

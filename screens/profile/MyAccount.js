@@ -32,7 +32,9 @@ const MyAccount = ({ navigation }) => {
     try {
       const response = await axios.get(`${UPDATEUSER}/${userData?._id}?lang_code=${i18n.locale}`);
       setUserDetail(response.data?.payload?.result);
-      hideLoader();
+      setTimeout(() => {
+        hideLoader();
+      }, 1000);
     } catch (error) {
       hideLoader();
       console.log(error, "error");
@@ -91,7 +93,7 @@ const MyAccount = ({ navigation }) => {
   }, []);
 
   return (
-    <ThemeSafeAreaView style={{ paddingHorizontal: 15 }}>
+    <ThemeSafeAreaView style={{ paddingHorizontal: 15 }} onReload={getUserDetail}>
       <ThemedView style={{ marginTop: 20 }}>
         <View style={styles.imageBox}>
           <View style={{ position: "relative" }}>

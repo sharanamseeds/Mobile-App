@@ -51,6 +51,17 @@ export const counterSlice = createSlice({
       state.cartItem = [...updateddata];
       AsyncStorage.setItem("cartdata", JSON.stringify(state.cartItem));
     },
+    UPDATEQTY: (state, action) => {
+      let updateddata = state.cartItem.map((curval) => {
+        if (curval._id === action.payload._id) {
+          return { ...curval, qty: action.payload.qty};
+        }
+        return curval;
+      });
+
+      state.cartItem = [...updateddata];
+      AsyncStorage.setItem("cartdata", JSON.stringify(state.cartItem));
+    },
     DELITEM: (state, action) => {
       const productexist = state.cartItem.filter((item) => item._id === action.payload._id);
       if (productexist) {
@@ -76,7 +87,7 @@ export const counterSlice = createSlice({
       if (productexist) {
         let updateddata = state.cartItem.map((curval) => {
           if (curval._id === action.payload._id) {
-            return { ...curval, selectedOffer: action.payload?.selectedOffer };
+            return { ...curval, selectedOffer: action.payload?.selectedOffer || null };
           }
           return curval;
         });
@@ -95,6 +106,6 @@ export const counterSlice = createSlice({
 });
 
 // Action creators are generated for each case reducer function
-export const { INC, DEC, ADDCART, DELITEM, REMOVECARTITEM, SETCARTITEM, REMOVEOFFER, ADDOFFER } = counterSlice.actions;
+export const { INC, DEC, ADDCART, DELITEM, REMOVECARTITEM, SETCARTITEM, REMOVEOFFER, ADDOFFER, UPDATEQTY } = counterSlice.actions;
 
 export default counterSlice.reducer;

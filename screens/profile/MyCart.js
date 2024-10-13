@@ -9,6 +9,7 @@ import {
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
@@ -30,7 +31,8 @@ const MyCart = ({ navigation }) => {
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState({});
-  const { addQty, removeQty, removeCartItem, addOffer, removeOffer, cartLoading } = useContext(AuthContext);
+  const { addQty, removeQty, removeCartItem, addOffer, removeOffer, cartLoading, updateQty } =
+    useContext(AuthContext);
   const { cartItem } = useSelector((state) => state?.cartItem);
 
   // theme color
@@ -94,6 +96,10 @@ const MyCart = ({ navigation }) => {
     }
   };
 
+  const handleQtyChange = async(val, id) => {
+    await updateQty(val, id)
+  }
+
   useEffect(() => {
     if (cartItem?.length > 0) {
       getProductTotal();
@@ -133,12 +139,18 @@ const MyCart = ({ navigation }) => {
                         <TouchableOpacity
                           onPress={() => navigation.navigate("ProductDetail", { pid: item._id })}
                         >
-                          <ThemedText style={{ ...styles.title }}>{item?.product_name}</ThemedText>
+                          <ThemedText
+                            style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold" }}
+                          >
+                            {item?.product_name}
+                          </ThemedText>
                           <ThemedText style={{ ...styles.price, marginTop: -2 }}>
                             {item?.product_code}
                           </ThemedText>
-                          <ThemedText style={{ ...styles.title }}>
-                            ₹ {item?.price?.toFixed(2)}
+                          <ThemedText
+                            style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold" }}
+                          >
+                            ₹ {item?.price_with_gst?.toFixed(2)}
                           </ThemedText>
                         </TouchableOpacity>
                       </View>
@@ -165,7 +177,8 @@ const MyCart = ({ navigation }) => {
                               color={"#FFF"}
                             />
                           </TouchableOpacity>
-                          <Text style={{ backgroundColor: "#FFF", fontSize: 18 }}>{item?.qty}</Text>
+                          <TextInput onChangeText={(val) => handleQtyChange(val, item?._id)} style={{fontSize: 18}} value={item?.qty?.toString()} maxLength={5} keyboardType="numeric"/>
+                          {/* <Text style={{ backgroundColor: "#FFF", fontSize: 18 }}>{item?.qty}</Text> */}
                           <TouchableOpacity
                             style={{
                               ...styles.cartButton,
@@ -252,32 +265,34 @@ const MyCart = ({ navigation }) => {
                       </View>
                     </TouchableOpacity>
                   ) : (
-                    <TouchableOpacity
-                      style={{
-                        ...styles.offerCard,
-                        backgroundColor: `${primaryColor}80`,
-                        marginTop: -8,
-                        marginHorizontal: 5,
-                      }}
-                      onPress={() => {
-                        setSelectedProduct(item);
-                        setModalVisible(true);
-                      }}
-                    >
-                      <View style={{ ...styles.offerDetail }}>
-                        <Entypo name="price-tag" size={24} color={textColor} />
-                      </View>
-                      <View
+                    item?.offers?.length > 0 && (
+                      <TouchableOpacity
                         style={{
-                          flexDirection: "row",
-                          alignItems: "center",
-                          justifyContent: "center",
+                          ...styles.offerCard,
+                          backgroundColor: `${primaryColor}80`,
+                          marginTop: -8,
+                          marginHorizontal: 5,
+                        }}
+                        onPress={() => {
+                          setSelectedProduct(item);
+                          setModalVisible(true);
                         }}
                       >
-                        <ThemedText>{i18n.t("view_offer")}</ThemedText>
-                        <Feather name="chevron-right" size={18} color={textColor} />
-                      </View>
-                    </TouchableOpacity>
+                        <View style={{ ...styles.offerDetail }}>
+                          <Entypo name="price-tag" size={24} color={textColor} />
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <ThemedText>{i18n.t("view_offer")}</ThemedText>
+                          <Feather name="chevron-right" size={18} color={textColor} />
+                        </View>
+                      </TouchableOpacity>
+                    )
                   )}
 
                   <View
@@ -435,7 +450,7 @@ const MyCart = ({ navigation }) => {
                     style={{ flexDirection: "row" }}
                     onPress={() => {
                       dispatch(ADDOFFER({ ...selectedProduct, selectedOffer: item?._id }));
-                      addOffer({ ...selectedProduct, selectedOffer: item?._id })
+                      addOffer({ ...selectedProduct, selectedOffer: item?._id });
                       item["selectedOffer"] = item?._id;
                       setModalVisible(false);
                     }}
@@ -476,7 +491,7 @@ const MyCart = ({ navigation }) => {
                 setModalVisible(false);
                 setSelectedProduct({ ...selectedProduct, selectedOffer: null });
                 dispatch(REMOVEOFFER(selectedProduct));
-                removeOffer(selectedProduct)
+                removeOffer(selectedProduct);
               }}
             >
               <Feather name="trash" size={18} color={"#FFF"} />

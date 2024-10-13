@@ -7,6 +7,7 @@ import {
   useWindowDimensions,
   Modal,
   Dimensions,
+  TextInput,
 } from "react-native";
 import ThemeSafeAreaView from "../../components/ThemeSafeAreaView";
 import { ThemedView } from "../../components/ThemedView";
@@ -39,7 +40,7 @@ const ProductDetail = ({ navigation, route }) => {
   const textColor = useThemeColor({}, "text");
   const boxColor = useThemeColor({}, "boxColor");
   const boxShadow = useThemeColor({}, "boxShadow");
-  const { showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem, addOffer, removeOffer, cartLoading } =
+  const { showLoader, hideLoader, addCart, addQty, removeQty, removeCartItem, addOffer, removeOffer, cartLoading, updateQty } =
     useContext(AuthContext);
 
   const getProductDetail = async (id) => {
@@ -54,7 +55,20 @@ const ProductDetail = ({ navigation, route }) => {
     }
   };
 
+  const handleQtyChange = async(val, id) => {
+    await updateQty(val, id)
+  }
+
   const cartData = cartItem.find((f) => f._id === pid);
+
+  const reloadData = () => {
+    if (pid) {
+      getProductDetail(pid);
+    }
+    navigation.setOptions({
+      title: i18n.t("product_detail"),
+    });
+  }
 
   useEffect(() => {
     if (pid) {
@@ -67,7 +81,7 @@ const ProductDetail = ({ navigation, route }) => {
 
   return (
     <>
-      <ThemeSafeAreaView>
+      <ThemeSafeAreaView onReload={reloadData}>
         <ThemedView
           style={{
             borderBottomColor: "grey",
@@ -110,7 +124,7 @@ const ProductDetail = ({ navigation, route }) => {
             <ThemedText style={{ ...styles.price, marginTop: -2 }}>
               {productDetail?.product_code}
             </ThemedText>
-            <ThemedText style={{ fontSize: 18, fontWeight: 600 }}>
+            <ThemedText style={{ fontSize: 18, fontWeight: 600, fontFamily: 'PoppinsBold' }}>
               {productDetail?.product_name}
             </ThemedText>
           </View>
@@ -188,19 +202,19 @@ const ProductDetail = ({ navigation, route }) => {
           )}
           <View style={styles.priceCard}>
             <View>
-              <ThemedText style={{ fontWeight: 600, fontSize: 18, color: "#000" }}>
-                ₹ {productDetail?.price}
+              <ThemedText style={{ fontWeight: 600, fontSize: 18, color: "#000",fontFamily: 'PoppinsBold' }}>
+                ₹ {productDetail?.price_with_gst}
               </ThemedText>
-              <ThemedText style={{ fontWeight: 400, fontSize: 14, marginTop: 5, color: "#000" }}>
-                @{productDetail?.price}
+              <ThemedText style={{ fontWeight: 400, fontSize: 14, marginTop: 0, color: "#000" }}>
+                {productDetail?.size} {productDetail?.base_unit}@{productDetail?.price_with_gst}
               </ThemedText>
             </View>
             {productDetail?.in_stock ? (
               !cartData ? (
                 <TouchableOpacity
                   style={{
-                    width: "40%",
-                    height: "80%",
+                    width: "60%",
+                    height: "70%",
                     backgroundColor: primaryColor,
                     textAlign: "center",
                     borderRadius: 10,
@@ -246,7 +260,8 @@ const ProductDetail = ({ navigation, route }) => {
                       color={"#FFF"}
                     />
                   </TouchableOpacity>
-                  <Text style={{ backgroundColor: "#FFF", fontSize: 20 }}>{cartData?.qty}</Text>
+                  <TextInput onChangeText={(val) => handleQtyChange(val, pid)} style={{fontSize: 18}} value={cartData?.qty?.toString()} maxLength={5} keyboardType="numeric"/>
+                  {/* <Text style={{ backgroundColor: "#FFF", fontSize: 20 }}>{cartData?.qty}</Text> */}
                   <TouchableOpacity
                     style={{
                       ...styles.cartButton,
@@ -434,8 +449,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   cartButtonMain: {
-    width: "40%",
-    height: "80%",
+    width: "60%",
+    height: "70%",
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderRadius: 10,
