@@ -108,12 +108,12 @@ const MyOrder = ({ navigation }) => {
         <View style={{ ...styles.card }}>
           <View style={styles.cardImage}>
             <TouchableOpacity onPress={() => navigation.navigate("OrderDetail", { pid: item._id })}>
-              <Image
+              {item?.products?.[0]?.product_id?.images?.[0]?.value && <Image
                 source={{
                   uri: GetServerImage(item?.products?.[0]?.product_id?.images?.[0]?.value),
                 }}
                 style={styles.image}
-              />
+              />}
             </TouchableOpacity>
           </View>
           <View style={styles.cardDetail}>

@@ -32,6 +32,7 @@ import i18n from "../i18n";
 import Language from "../screens/Languages/language";
 import axios from "axios";
 import { GETCART } from "../constant/ApiRoutes";
+import PaymentDetail from "../screens/paymentDetail/paymentDetail";
 
 const Stack = createNativeStackNavigator();
 const BottomTab = createBottomTabNavigator();
@@ -404,6 +405,23 @@ const StackNav = () => {
         component={ProfileEdit}
         options={({ navigation }) => ({
           headerTitle: (props) => <CustomTitle {...props} title={i18n.t("edit_profile")} />,
+          headerTitleAlign: "center",
+          headerStyle: {
+            backgroundColor: background,
+          },
+          headerLeft: () => (
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Feather name="chevron-left" size={30} style={{ marginLeft: 0 }} color={textColor} />
+            </TouchableOpacity>
+          ),
+          headerBackVisible: false,
+        })}
+      />
+       <Stack.Screen
+        name="PaymentDetail"
+        component={PaymentDetail}
+        options={({ navigation }) => ({
+          headerTitle: (props) => <CustomTitle {...props} title={i18n.t("payment_detail")} />,
           headerTitleAlign: "center",
           headerStyle: {
             backgroundColor: background,

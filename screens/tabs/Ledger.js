@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { ThemedView } from "../../components/ThemedView";
 import { useThemeColor } from "../../hook/useThemeColor";
-import { Feather } from "@expo/vector-icons";
+import { Feather, MaterialCommunityIcons } from "@expo/vector-icons";
 import { ThemedText } from "../../components/ThemedText";
 import { useCallback, useContext, useEffect, useState } from "react";
 import axios from "axios";
@@ -19,7 +19,11 @@ import moment from "moment";
 import ThemeSafeAreaViewWOS from "../../components/ThemeSafeAreaViewWOS";
 import { SearchBar } from "react-native-elements";
 import { debounce } from "lodash";
+import * as Print from "expo-print";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import i18n from "../../i18n";
+import { Buffer } from "buffer";
 
 const Ledger = ({ navigation }) => {
   const textColor = useThemeColor({}, "text");
@@ -32,47 +36,55 @@ const Ledger = ({ navigation }) => {
   const background = useThemeColor({ light: lightColor, dark: darkColor }, "background");
   const [ledgerData, setLedgerData] = useState({});
   const [ledgerList, setLedgerList] = useState([]);
-  const [selectedFilter, setSelectedFilter] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
   const [filter, setFilter] = useState({
     type: "",
+    date: ""
   });
-  const [page, setPage] = useState(1);
-  const [refreshing, setRefreshing] = useState(true);
-  const [hasMore, setHasMore] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const { loading, showLoader, hideLoader } = useContext(AuthContext);
+  const { showLoader, hideLoader } = useContext(AuthContext);
 
-  const fetchLedger = async () => {
-    try {
-      const response = await axios.get(`${USERDETAIL}?lang_code=${i18n.locale}`);
-      setLedgerData(response?.data?.payload?.result);
-    } catch (error) {
-      console.log(error?.response?.data?.message);
-    }
-  };
-
-  const fetchLedgerList = async (reset = false, searchTerm = "") => {
-    if (loading || (!hasMore && !reset)) return;
-    setRefreshing(false);
+  const fetchLedgerList = async (searchTerm = "") => {
+    setRefreshing(true);
     showLoader();
     try {
       const params = {
-        page: reset ? 1 : page,
         search: searchTerm,
-        type: filter?.type,
+        category: filter?.type,
+        date: filter?.date,
         lang_code: i18n.locale,
       };
 
       const response = await axios.get(LEDGERLIST, { params });
-      const newData = response?.data?.payload?.result?.data || [];
+      setLedgerData(response.data?.payload?.result);
+      const newData = response.data?.payload?.result?.groupedData || [];
+      let LedgerArr = [];
       if (newData?.length > 0) {
-        setLedgerList((prevData) => (reset ? newData : [...prevData, ...newData]));
-        setPage((prevPage) => (reset ? 2 : prevPage + 1));
-        setHasMore(true);
-      } else {
-        setHasMore(false);
+        newData.map((credit, index) => {
+          LedgerArr[index] = { month: credit?.month };
+          let DataArr = [];
+          if (credit?.credits?.length > 0) {
+            credit?.credits?.map((cr) => {
+              DataArr.push({
+                ...cr,
+                type: "credit",
+                invoice_id: "Amount Credited",
+                payment_amount: cr?.amount,
+              });
+            });
+          }
+          if (credit?.ledgers?.length > 0) {
+            credit?.ledgers?.map((ld) => {
+              DataArr.push(ld);
+            });
+          }
+          DataArr.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          LedgerArr[index] = { ...LedgerArr[index], data: DataArr };
+        });
       }
+      setLedgerList(LedgerArr);
+      setRefreshing(false);
       setTimeout(() => {
         hideLoader();
       }, 2000);
@@ -82,76 +94,172 @@ const Ledger = ({ navigation }) => {
     }
   };
 
+  const downloadPDF = async () => {
+    try {
+      const params = {
+        category: filter?.type,
+        date: filter?.date,
+        lang_code: i18n.locale,
+      };
+      const response = await axios.get(`${LEDGERLIST}/download/pdf`, { params });
+      createAndDownloadPdf(response?.data);
+      console.log(response?.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const createAndDownloadPdf = async (htmlContent) => {
+    try {
+      // Generate the PDF
+      const { uri } = await Print.printToFileAsync({ html: htmlContent });
+      // Define the file path where you want to save the PDF
+      const fileName = `${FileSystem.documentDirectory}history.pdf`;
+
+      await FileSystem.copyAsync({
+        from: uri,
+        to: fileName,
+      });
+
+      // Optionally share the file after download
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(fileName);
+      }
+
+      hideLoader();
+    } catch (error) {
+      console.error("Error downloading PDF:", error);
+    }
+  };
+
+  const downloadExcel = async () => {
+    try {
+      const params = {
+        category: filter?.type,
+        date: filter?.date,
+        lang_code: i18n.locale,
+      };
+      const response = await axios.get(`${LEDGERLIST}/download/excel`, {
+        params,
+        responseType: "arraybuffer", // Use 'arraybuffer' for binary data
+      });
+
+      // Create a temporary file path
+      const fileUri = FileSystem.documentDirectory + "data.xlsx";
+
+      // Write the binary data to file
+      await FileSystem.writeAsStringAsync(fileUri, Buffer.from(response.data).toString("base64"), {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      // Check if sharing is available
+      if (!(await Sharing.isAvailableAsync())) {
+        Alert.alert("Sharing is not available on this platform");
+        return;
+      }
+
+      // Share the file
+      await Sharing.shareAsync(fileUri);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const renderLedger = ({ item, index }) => {
     return (
-      <View style={styles.transaction} key={index}>
-        {console.log(item?.bill)}
-        <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
-          <View
-            style={{
-              backgroundColor: `${item?.type === "credit" ? primaryColor : secondaryColor}40`,
-              padding: 5,
-              borderRadius: 50,
-              flexDirection: "row",
-              justifyContent: "center",
-              alignItems: "center",
-              marginRight: 10,
-            }}
-          >
-            <Feather
-              name={item?.type === "credit" ? "credit-card" : "file-text"}
-              size={24}
-              color={item?.type === "credit" ? primaryColor : secondaryColor}
-            />
-          </View>
-          <View>
-            <ThemedText style={{ fontSize: 18, fontWeight: 500 }}>{item?.invoice_id}</ThemedText>
-            <ThemedText>
-              {item?.createdAt ? moment(item?.createdAt).format("DD MMM") : ""}
-            </ThemedText>
-          </View>
-        </View>
-        <View>
+      <View key={index}>
+        <View
+          style={{
+            paddingHorizontal: 10,
+            paddingVertical: 5,
+            backgroundColor: secondaryColor,
+            borderRadius: 50,
+            marginHorizontal: 15,
+            marginTop: 5,
+          }}
+        >
           <ThemedText
             style={{
-              color: item?.type === "credit" ? primaryColor : secondaryColor,
-              fontSize: 18,
+              textAlign: "center",
+              color: "#FFF",
+              fontWeight: 600,
+              fontFamily: "PoppinsBold",
             }}
           >
-            {item?.type === "credit" ? "+" : "-"}
-            {item?.payment_amount}
+            {item?.month}
           </ThemedText>
         </View>
+        {item?.data?.length > 0 &&
+          item?.data?.map((cr) => {
+            return (
+              <TouchableOpacity
+                style={styles.transaction}
+                key={cr?._id}
+                onPress={() => navigation.navigate("PaymentDetail", { payment: cr })}
+              >
+                <View style={{ flex: 1, flexDirection: "row", alignItems: "center" }}>
+                  <View
+                    style={{
+                      backgroundColor: `${cr?.type === "credit" ? primaryColor : secondaryColor}40`,
+                      padding: 5,
+                      borderRadius: 50,
+                      flexDirection: "row",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      marginRight: 10,
+                    }}
+                  >
+                    <Feather
+                      name={cr?.type === "credit" ? "credit-card" : "file-text"}
+                      size={24}
+                      color={cr?.type === "credit" ? primaryColor : secondaryColor}
+                    />
+                  </View>
+                  <View>
+                    <ThemedText style={{ fontSize: 18, fontWeight: 500 }}>
+                      {cr?.invoice_id}
+                    </ThemedText>
+                    <ThemedText>
+                      {cr?.createdAt ? moment(cr?.createdAt).format("DD MMM") : ""}
+                    </ThemedText>
+                  </View>
+                </View>
+                <View>
+                  <ThemedText
+                    style={{
+                      color: cr?.type === "credit" ? primaryColor : secondaryColor,
+                      fontSize: 18,
+                    }}
+                  >
+                    {cr?.type === "credit" ? "+" : "-"}
+                    {cr?.payment_amount}
+                  </ThemedText>
+                </View>
+              </TouchableOpacity>
+            );
+          })}
       </View>
     );
   };
 
   // Create a debounced version of the fetchResults function
   const debouncedFetchResults = useCallback(
-    debounce((searchTerm) => fetchLedgerList(true, searchTerm), 1000),
+    debounce((searchTerm) => fetchLedgerList(searchTerm), 1000),
     [fetchLedgerList]
   );
 
   const handleInputChange = (text) => {
     setSearch(text);
-    setLedgerList([]);
     debouncedFetchResults(text);
   };
 
   const reloadData = () => {
-    fetchLedger();
     fetchLedgerList();
   };
 
   useEffect(() => {
-    fetchLedger();
-  }, [i18n.locale]);
-
-  useEffect(() => {
     setLedgerList([]);
-    setHasMore(true);
-    setPage(1);
-    fetchLedgerList(true);
+    fetchLedgerList();
     navigation.setOptions({
       title: i18n.t("ladger"),
     });
@@ -163,7 +271,7 @@ const Ledger = ({ navigation }) => {
         nestedScrollEnabled={true}
         scrollEnabled={true}
         data={ledgerList}
-        keyExtractor={(item) => item?._id}
+        keyExtractor={(item, index) => index}
         showsVerticalScrollIndicator={false}
         renderItem={renderLedger}
         ListHeaderComponent={
@@ -191,21 +299,20 @@ const Ledger = ({ navigation }) => {
             </ThemedView>
             <ThemedView
               style={{
-                paddingHorizontal: 15,              
+                paddingHorizontal: 15,
                 paddingVertical: 5,
                 marginTop: 1,
                 marginBottom: 1,
               }}
             >
-              {console.log(ledgerData, "led")}
-              <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
-                <View style={{width: "50%"}}>
+              <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between" }}>
+                <View style={{ width: "50%" }}>
                   <ThemedText style={{ fontSize: 14 }}>{i18n.t("total_money_added")}</ThemedText>
                   <ThemedText style={{ fontSize: 16, fontWeight: 600, fontFamily: "PoppinsBold" }}>
                     ₹ {ledgerData?.totalMoneyAdded}
                   </ThemedText>
                 </View>
-                <View style={{width: "50%"}}>
+                <View style={{ width: "50%" }}>
                   <ThemedText style={{ fontSize: 14 }}>{i18n.t("total_ledger_credit")}</ThemedText>
                   <ThemedText style={{ fontSize: 16, fontWeight: 600, fontFamily: "PoppinsBold" }}>
                     ₹ {ledgerData?.totalCredit}
@@ -223,17 +330,17 @@ const Ledger = ({ navigation }) => {
                 marginBottom: 1,
               }}
             >
-             <View style={{flex:1, flexDirection: 'row', justifyContent: 'space-between'}}>
-                <View style={{width: "50%"}}>
+              <View style={{ flex: 1, flexDirection: "row", justifyContent: "space-between" }}>
+                <View style={{ width: "50%" }}>
                   <ThemedText style={{ fontSize: 14 }}>{i18n.t("total_ledger_debit")}</ThemedText>
                   <ThemedText style={{ fontSize: 16, fontWeight: 600, fontFamily: "PoppinsBold" }}>
                     ₹ {ledgerData?.totalDebit}
                   </ThemedText>
                 </View>
-                <View style={{width: "50%"}}>
+                <View style={{ width: "50%" }}>
                   <ThemedText style={{ fontSize: 14 }}>{i18n.t("final_balance")}</ThemedText>
                   <ThemedText style={{ fontSize: 16, fontWeight: 600, fontFamily: "PoppinsBold" }}>
-                    ₹ {ledgerData?.finalBalance}
+                    ₹ {ledgerData?.availableCreditLimit}
                   </ThemedText>
                 </View>
               </View>
@@ -247,9 +354,39 @@ const Ledger = ({ navigation }) => {
                 marginBottom: 12,
               }}
             >
-              <ThemedText style={{ fontSize: 18, marginBottom: 5 }}>
-                {i18n.t("all_transaction_list")}
-              </ThemedText>
+              <View
+                style={{
+                  flexDirection: "row",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  marginBottom: 10,
+                }}
+              >
+                <ThemedText style={{ fontSize: 18 }}>{i18n.t("all_transaction_list")}</ThemedText>
+                <View style={{ flexDirection: "row" }}>
+                  <TouchableOpacity
+                    onPress={() => downloadPDF()}
+                    style={{ backgroundColor: `${primaryColor}40`, padding: 5, borderRadius: 50 }}
+                  >
+                    <MaterialCommunityIcons name="file-download" color={primaryColor} size={24} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => downloadExcel()}
+                    style={{
+                      marginLeft: 10,
+                      backgroundColor: `${secondaryColor}40`,
+                      padding: 5,
+                      borderRadius: 50,
+                    }}
+                  >
+                    <MaterialCommunityIcons
+                      name="microsoft-excel"
+                      color={secondaryColor}
+                      size={24}
+                    />
+                  </TouchableOpacity>
+                </View>
+              </View>
               <ThemedView
                 style={{
                   flexDirection: "row",
@@ -306,7 +443,6 @@ const Ledger = ({ navigation }) => {
           </>
         }
         //ListFooterComponent={renderFooter}
-        onEndReached={() => fetchLedgerList()}
         onEndReachedThreshold={0.5}
         initialNumToRender={10}
         maxToRenderPerBatch={5}
@@ -327,7 +463,7 @@ const Ledger = ({ navigation }) => {
               ...styles.modalView,
               backgroundColor: boxColor,
               shadowColor: boxShadow,
-              height: "25%",
+              height: "80%",
             }}
           >
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -342,11 +478,11 @@ const Ledger = ({ navigation }) => {
                 onPress={() => setModalVisible(!modalVisible)}
               />
             </View>
+            <ThemedText style={{ fontSize: 16, marginTop: 12 }}>{i18n.t("by_category")}</ThemedText>
             <View style={{ marginTop: 15 }}>
               <TouchableOpacity
                 style={{ flexDirection: "row" }}
                 onPress={() => {
-                  setSelectedFilter("");
                   setFilter({ ...filter, type: "" });
                   setModalVisible(false);
                 }}
@@ -356,9 +492,9 @@ const Ledger = ({ navigation }) => {
                     ...styles.radio,
                     borderRadius: 50,
                     borderColor: primaryColor,
-                    backgroundColor: selectedFilter === "" ? primaryColor : "transparent",
+                    backgroundColor: filter?.type === "" ? primaryColor : "transparent",
                     marginRight: 10,
-                    marginBottom: 15,
+                    marginBottom: 10,
                   }}
                 ></View>
                 <ThemedText>{i18n.t("all")}</ThemedText>
@@ -366,8 +502,7 @@ const Ledger = ({ navigation }) => {
               <TouchableOpacity
                 style={{ flexDirection: "row" }}
                 onPress={() => {
-                  setSelectedFilter("credit");
-                  setFilter({ ...filter, type: "credit" });
+                  setFilter({ ...filter, type: "credit_note" });
                   setModalVisible(false);
                 }}
               >
@@ -375,10 +510,10 @@ const Ledger = ({ navigation }) => {
                   style={{
                     ...styles.radio,
                     borderRadius: 50,
-                    backgroundColor: selectedFilter === "credit" ? primaryColor : "transparent",
+                    backgroundColor: filter?.type === "credit_note" ? primaryColor : "transparent",
                     borderColor: primaryColor,
                     marginRight: 10,
-                    marginBottom: 15,
+                    marginBottom: 10,
                   }}
                 ></View>
                 <ThemedText>{i18n.t("by_credit")}</ThemedText>
@@ -386,8 +521,7 @@ const Ledger = ({ navigation }) => {
               <TouchableOpacity
                 style={{ flexDirection: "row" }}
                 onPress={() => {
-                  setSelectedFilter("debit");
-                  setFilter({ ...filter, type: "debit" });
+                  setFilter({ ...filter, type: "debit_note" });
                   setModalVisible(false);
                 }}
               >
@@ -395,12 +529,171 @@ const Ledger = ({ navigation }) => {
                   style={{
                     ...styles.radio,
                     borderRadius: 50,
-                    backgroundColor: selectedFilter === "debit" ? primaryColor : "transparent",
+                    backgroundColor: filter?.type === "debit_note" ? primaryColor : "transparent",
                     borderColor: primaryColor,
                     marginRight: 10,
+                    marginBottom: 10,
                   }}
                 ></View>
                 <ThemedText>{i18n.t("by_debit")}</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flexDirection: "row" }}
+                onPress={() => {
+                  setFilter({ ...filter, type: "invoice" });
+                  setModalVisible(false);
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.radio,
+                    borderRadius: 50,
+                    backgroundColor: filter?.type === "invoice" ? primaryColor : "transparent",
+                    borderColor: primaryColor,
+                    marginRight: 10,
+                    marginBottom: 10,
+                  }}
+                ></View>
+                <ThemedText>{i18n.t("by_invoice")}</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flexDirection: "row" }}
+                onPress={() => {
+                  setFilter({ ...filter, type: "payment" });
+                  setModalVisible(false);
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.radio,
+                    borderRadius: 50,
+                    backgroundColor: filter?.type === "payment" ? primaryColor : "transparent",
+                    borderColor: primaryColor,
+                    marginRight: 10,
+                    marginBottom: 10,
+                  }}
+                ></View>
+                <ThemedText>{i18n.t("by_payment")}</ThemedText>
+              </TouchableOpacity>
+            </View>
+            <ThemedText style={{ fontSize: 16, marginTop: 12 }}>{i18n.t("by_date")}</ThemedText>
+            <View style={{ marginTop: 15 }}>
+              <TouchableOpacity
+                style={{ flexDirection: "row" }}
+                onPress={() => {
+                  setFilter({ ...filter, date: "" });
+                  setModalVisible(false);
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.radio,
+                    borderRadius: 50,
+                    borderColor: primaryColor,
+                    backgroundColor: filter?.date === "" ? primaryColor : "transparent",
+                    marginRight: 10,
+                    marginBottom: 10,
+                  }}
+                ></View>
+                <ThemedText>{i18n.t("all")}</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flexDirection: "row" }}
+                onPress={() => {
+                  setFilter({ ...filter, date: "current_year" });
+                  setModalVisible(false);
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.radio,
+                    borderRadius: 50,
+                    borderColor: primaryColor,
+                    backgroundColor: filter?.date === "current_year" ? primaryColor : "transparent",
+                    marginRight: 10,
+                    marginBottom: 10,
+                  }}
+                ></View>
+                <ThemedText>{i18n.t("current_year")}</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flexDirection: "row" }}
+                onPress={() => {
+                  setFilter({ ...filter, date: "past_year" });
+                  setModalVisible(false);
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.radio,
+                    borderRadius: 50,
+                    borderColor: primaryColor,
+                    backgroundColor: filter?.date === "past_year" ? primaryColor : "transparent",
+                    marginRight: 10,
+                    marginBottom: 10,
+                  }}
+                ></View>
+                <ThemedText>{i18n.t("past_year")}</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flexDirection: "row" }}
+                onPress={() => {
+                  setFilter({ ...filter, date: "last_three_month" });
+                  setModalVisible(false);
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.radio,
+                    borderRadius: 50,
+                    borderColor: primaryColor,
+                    backgroundColor:
+                      filter?.date === "last_three_month" ? primaryColor : "transparent",
+                    marginRight: 10,
+                    marginBottom: 10,
+                  }}
+                ></View>
+                <ThemedText>{i18n.t("last_three_month")}</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flexDirection: "row" }}
+                onPress={() => {
+                  setFilter({ ...filter, date: "last_one_month" });
+                  setModalVisible(false);
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.radio,
+                    borderRadius: 50,
+                    borderColor: primaryColor,
+                    backgroundColor:
+                      filter?.date === "last_one_month" ? primaryColor : "transparent",
+                    marginRight: 10,
+                    marginBottom: 10,
+                  }}
+                ></View>
+                <ThemedText>{i18n.t("last_one_month")}</ThemedText>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flexDirection: "row" }}
+                onPress={() => {
+                  setFilter({ ...filter, date: "last_one_year" });
+                  setModalVisible(false);
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.radio,
+                    borderRadius: 50,
+                    borderColor: primaryColor,
+                    backgroundColor:
+                      filter?.date === "last_one_year" ? primaryColor : "transparent",
+                    marginRight: 10,
+                    marginBottom: 10,
+                  }}
+                ></View>
+                <ThemedText>{i18n.t("last_one_year")}</ThemedText>
               </TouchableOpacity>
             </View>
           </View>

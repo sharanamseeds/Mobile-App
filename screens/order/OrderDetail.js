@@ -118,7 +118,6 @@ const OrderDetail = ({ navigation, route }) => {
     try {
       // Generate the PDF
       const { uri } = await Print.printToFileAsync({ html: htmlContent });
-      console.log(uri);
       // Define the file path where you want to save the PDF
       const fileName = `${FileSystem.documentDirectory}${orderDetail?._id}.pdf`;
 
@@ -194,7 +193,6 @@ const OrderDetail = ({ navigation, route }) => {
   }
 
   useEffect(() => {
-    console.log(pid);
     if (pid) {
       getOrderDetail(pid);
     }
@@ -349,20 +347,20 @@ const OrderDetail = ({ navigation, route }) => {
                 <View style={{ ...styles.card }}>
                   <View style={styles.cardImage}>
                     <TouchableOpacity
-                      onPress={() => navigation.navigate("ProductDetail", { pid: item._id })}
+                      onPress={() => navigation.navigate("ProductDetail", { pid: item.product_id })}
                     >
-                      <Image
+                      {item?.images?.[0] && <Image
                         source={{
                           uri: GetServerImage(item?.images?.[0]),
                         }}
                         style={styles.image}
-                      />
+                      />}
                     </TouchableOpacity>
                   </View>
                   <View style={styles.cardDetail}>
                     <View style={styles.textContainer}>
                       <TouchableOpacity
-                        onPress={() => navigation.navigate("ProductDetail", { pid: item._id })}
+                        onPress={() => navigation.navigate("ProductDetail", { pid: item.product_id })}
                       >
                         <ThemedText
                           style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold" }}

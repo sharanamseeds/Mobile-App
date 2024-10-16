@@ -19,7 +19,7 @@ const Home = ({ navigation }) => {
   const [categories, setCategories] = useState([]);
   const [brands, setBrands] = useState([]);
   const [CarouselData, setCarouselData] = useState([]);
-  const [bannerData, setBannerData] = useState([])
+  const [bannerData, setBannerData] = useState([]);
   const [featureProduct, setFeatureProduct] = useState([]);
   const { showLoader, hideLoader } = useContext(AuthContext);
 
@@ -89,10 +89,14 @@ const Home = ({ navigation }) => {
           style={styles.image}
         />
         <View style={styles.textContainer}>
-          <ThemedText style={{ ...styles.title, color: "#000", fontWeight: 600, fontFamily: 'PoppinsBold' }}>
+          <ThemedText
+            style={{ ...styles.title, color: "#000", fontWeight: 600, fontFamily: "PoppinsBold" }}
+          >
             {item?.product_name}
           </ThemedText>
-          <ThemedText style={{...styles.price, fontWeight: 600, fontFamily: 'PoppinsBold'}}>₹ {item?.price_with_gst}</ThemedText>
+          <ThemedText style={{ ...styles.price, fontWeight: 600, fontFamily: "PoppinsBold" }}>
+            ₹ {item?.price_with_gst}
+          </ThemedText>
         </View>
       </TouchableOpacity>
     );
@@ -125,7 +129,7 @@ const Home = ({ navigation }) => {
       showLoader();
       const response = await axios.get(`${BANNER}?lang_code=${i18n.locale}`);
       setCarouselData(response.data?.payload?.result?.images);
-      setBannerData(response.data?.payload?.result?.banners)
+      setBannerData(response.data?.payload?.result?.banners);
     } catch (error) {
       hideLoader();
       console.log(error);
@@ -152,9 +156,9 @@ const Home = ({ navigation }) => {
     getFeatureProduct();
     getBanner();
     navigation.setOptions({
-      title: i18n.t('home'),
+      title: i18n.t("home"),
     });
-  }
+  };
 
   useEffect(() => {
     getCategories();
@@ -162,7 +166,7 @@ const Home = ({ navigation }) => {
     getFeatureProduct();
     getBanner();
     navigation.setOptions({
-      title: i18n.t('home'),
+      title: i18n.t("home"),
     });
   }, [i18n.locale]);
 
@@ -270,37 +274,21 @@ const Home = ({ navigation }) => {
             </View>
           </ThemedView>
         )}
-        {bannerData?.length > 0 && (
-          <ThemedView>
-            <Carousel
-              loop
-              mode="parallax"
-              width={width}
-              height={350}
-              autoPlay={true}
-              data={bannerData}
-              autoPlayInterval={2000}
-              scrollAnimationDuration={1000}
-              enabled={false}
-              renderItem={({ item, index }) => (
-                <ThemedView
-                  style={{
-                    flex: 1,
-                    marginHorizontal: 4,
-                    borderRadius: 20,
-                    justifyContent: "center",
-                  }}
-                  key={index}
-                >
-                  <Image
-                    source={{ uri: GetServerImage(item) }}
-                    style={{ width: "100%", height: 350, borderRadius: 20 }}
-                  />
-                </ThemedView>
-              )}
-            />
-          </ThemedView>
-        )}
+        {bannerData?.length > 0 && <ThemedView
+          style={{
+            flex: 1,
+            marginHorizontal: 4,
+            paddingHorizontal: 15,
+            marginBottom: 10,
+            borderRadius: 20,
+            justifyContent: "center",
+          }}
+        >
+          <Image
+            source={{ uri: GetServerImage(bannerData?.[0]) }}
+            style={{ width: "100%", height: 350, borderRadius: 20 }}
+          />
+        </ThemedView>}
       </ThemeSafeAreaView>
       <CartItemTotal navigation={navigation} />
     </>

@@ -6,7 +6,7 @@ import Navbar from "./navigation";
 import { Provider } from "react-redux";
 import store from "./redux/store";
 import { useFonts } from "expo-font";
-import { Entypo, Feather, FontAwesome } from "@expo/vector-icons";
+import { Entypo, Feather, FontAwesome, MaterialCommunityIcons } from "@expo/vector-icons";
 import Toast from 'react-native-toast-message';
 import './config/axios'
 
@@ -20,6 +20,7 @@ export default function App() {
     ...FontAwesome.font,
     ...Feather.font,
     ...Entypo.font,
+    ...MaterialCommunityIcons.font
   });
 
   if (!fontsLoaded && !fontError) {

@@ -108,5 +108,17 @@
     "cancel_order": "Order Cancel",
     "reason": "Reason",
     "return_order": "Return Order",
-    "download_bill": "Download Bill"
+    "download_bill": "Download Bill",
+    "by_payment": "By Payment",
+    "by_invoice": "By Invoice",
+    "by_date": "By Date",
+    "current_year": "By Current Year",
+    "past_year": "By Past Year",
+    "last_three_month": "By Last Three Month",
+    "last_one_month": "By Last One Month",
+    "last_one_year": "By Last One Year",
+    "payment_detail": "Payment Detail",
+    "payment_amounts": "Payable Amount",
+    "payment_date": "Payment Date",
+    "invoice_id": "Invoice Id"
 }

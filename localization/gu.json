@@ -108,5 +108,17 @@
   "cancel_order": "ઓર્ડર રદ કરો",
   "reason": "કારણ",
   "return_order": "પરત ઓર્ડર",
-  "download_bill": "બિલ ડાઉનલોડ કરો"
+  "download_bill": "બિલ ડાઉનલોડ કરો",
+  "by_payment": "ચુકવણી દ્વારા",
+  "by_invoice": "ઇન્વોઇસ દ્વારા",
+  "by_date": "તારીખ દ્વારા",
+  "current_year": "વર્તમાન વર્ષ દ્વારા",
+  "past_year": "પાછલા વર્ષ દ્વારા",
+  "last_three_month": "છેલ્લા ત્રણ મહિના સુધીમાં",
+  "last_one_month": "છેલ્લા એક મહિના સુધીમાં",
+  "last_one_year": "છેલ્લા એક વર્ષ સુધીમાં",
+  "payment_detail": "ચુકવણીની વિગતો",
+  "payment_amounts": "ચૂકવવાપાત્ર રકમ",
+  "payment_date": "ચુકવણીની તારીખ",
+  "invoice_id": "ઇન્વોઇસ આઈડી"
 }
