@@ -12,6 +12,7 @@ import { BANNER, BRANDLIST, CATEGORYLIST, PRODUCTLIST } from "../../constant/Api
 import { AuthContext } from "../../context/authContext";
 import { GetServerImage } from "../../helper/helper";
 import i18n from "../../i18n";
+import GlobalLoader from "../../components/GlobalLoading";
 
 const Home = ({ navigation }) => {
   const width = Dimensions.get("window").width;
@@ -21,7 +22,7 @@ const Home = ({ navigation }) => {
   const [CarouselData, setCarouselData] = useState([]);
   const [bannerData, setBannerData] = useState([]);
   const [featureProduct, setFeatureProduct] = useState([]);
-  const { showLoader, hideLoader } = useContext(AuthContext);
+  const { showLoader, hideLoader, loading } = useContext(AuthContext);
 
   const moveToProduct = ({ name, value }) => {
     navigation.navigate("ProductFilter", { [name]: value });
@@ -143,7 +144,7 @@ const Home = ({ navigation }) => {
       setFeatureProduct(response.data?.payload?.result?.data);
       setTimeout(() => {
         hideLoader();
-      }, 2000);
+      }, 200);
     } catch (error) {
       hideLoader();
       console.log(error);
@@ -171,7 +172,7 @@ const Home = ({ navigation }) => {
   }, [i18n.locale]);
 
   return (
-    <>
+    !loading ? <>
       <ThemeSafeAreaView onReload={pageReload}>
         {CarouselData?.length > 0 && (
           <ThemedView>
@@ -291,7 +292,7 @@ const Home = ({ navigation }) => {
         </ThemedView>}
       </ThemeSafeAreaView>
       <CartItemTotal navigation={navigation} />
-    </>
+    </> : <GlobalLoader />
   );
 };
 

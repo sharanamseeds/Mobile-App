@@ -23,6 +23,7 @@ import { GetServerImage } from "../../helper/helper";
 import ThemeSafeAreaViewWOS from "../../components/ThemeSafeAreaViewWOS";
 import moment from "moment";
 import i18n from "../../i18n";
+import GlobalLoader from "../../components/GlobalLoading";
 
 const MyOrder = ({ navigation }) => {
   const dispatch = useDispatch();
@@ -108,12 +109,14 @@ const MyOrder = ({ navigation }) => {
         <View style={{ ...styles.card }}>
           <View style={styles.cardImage}>
             <TouchableOpacity onPress={() => navigation.navigate("OrderDetail", { pid: item._id })}>
-              {item?.products?.[0]?.product_id?.images?.[0]?.value && <Image
-                source={{
-                  uri: GetServerImage(item?.products?.[0]?.product_id?.images?.[0]?.value),
-                }}
-                style={styles.image}
-              />}
+              {item?.products?.[0]?.product_id?.images?.[0]?.value && (
+                <Image
+                  source={{
+                    uri: GetServerImage(item?.products?.[0]?.product_id?.images?.[0]?.value),
+                  }}
+                  style={styles.image}
+                />
+              )}
             </TouchableOpacity>
           </View>
           <View style={styles.cardDetail}>
@@ -154,7 +157,7 @@ const MyOrder = ({ navigation }) => {
         status: filter?.status,
         order_type: filter?.order_type,
         page: reset ? 1 : page,
-        lang_code: i18n.locale
+        lang_code: i18n.locale,
       };
 
       const response = await axios.get(ORDERLIST, { params });
@@ -167,7 +170,7 @@ const MyOrder = ({ navigation }) => {
       } else {
         setHasMore(false);
       }
-     setTimeout(() => {
+      setTimeout(() => {
         hideLoader();
       }, 2000);
     } catch (error) {
@@ -184,15 +187,15 @@ const MyOrder = ({ navigation }) => {
     setPage(1);
     orderList(true);
     navigation.setOptions({
-      title: i18n.t('order'),
+      title: i18n.t("order"),
     });
   }, [filter, i18n.locale]);
 
-  return (
+  return !loading ? (
     <ThemeSafeAreaViewWOS style={{ paddingHorizontal: 15 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <ThemedText type="title" style={{ fontSize: 22 }}>
-          {i18n.t('orders')}
+          {i18n.t("orders")}
         </ThemedText>
         <TouchableOpacity
           style={{
@@ -244,7 +247,7 @@ const MyOrder = ({ navigation }) => {
               style={{ width: 100, height: 100 }}
             />
             <ThemedText type="title" style={{ fontSize: 22 }}>
-              {i18n.t('no_order_found')}
+              {i18n.t("no_order_found")}
             </ThemedText>
           </View>
         )}
@@ -267,7 +270,9 @@ const MyOrder = ({ navigation }) => {
             }}
           >
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-              <Text style={{ color: textColor, fontSize: 20, fontWeight: 600 }}>{i18n.t('filters')}</Text>
+              <Text style={{ color: textColor, fontSize: 20, fontWeight: 600 }}>
+                {i18n.t("filters")}
+              </Text>
               <Feather
                 name="x"
                 size={22}
@@ -276,7 +281,7 @@ const MyOrder = ({ navigation }) => {
                 onPress={() => setModalVisible(!modalVisible)}
               />
             </View>
-            <ThemedText style={{ fontSize: 18, marginTop: 12 }}>{i18n.t('by_status')}</ThemedText>
+            <ThemedText style={{ fontSize: 18, marginTop: 12 }}>{i18n.t("by_status")}</ThemedText>
             <View style={{ marginTop: 15 }}>
               {status?.length > 0 &&
                 status.map((item, index) => (
@@ -305,7 +310,16 @@ const MyOrder = ({ navigation }) => {
                 ))}
             </View>
             <TouchableOpacity
-              style={{ flexDirection: "row", backgroundColor: secondaryColor, width: '100%', padding: 10, borderRadius: 50, marginTop: 10 , alignItems: 'center', justifyContent: 'center'}}
+              style={{
+                flexDirection: "row",
+                backgroundColor: secondaryColor,
+                width: "100%",
+                padding: 10,
+                borderRadius: 50,
+                marginTop: 10,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
               onPress={() => {
                 setFilter({ order_type: "", status: "" });
                 setSelectedFilter({ order_type: "", status: "" });
@@ -313,12 +327,16 @@ const MyOrder = ({ navigation }) => {
               }}
             >
               <Feather name="trash" size={18} color={"#FFF"} />
-              <Text style={{ color: "#FFF", marginRight: 15, fontSize: 18 }}>{i18n.t('clear_filter')}</Text>
+              <Text style={{ color: "#FFF", marginRight: 15, fontSize: 18 }}>
+                {i18n.t("clear_filter")}
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
       </Modal>
     </ThemeSafeAreaViewWOS>
+  ) : (
+    <GlobalLoader />
   );
 };
 

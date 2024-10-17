@@ -496,7 +496,7 @@ const Navbar = () => {
           <StackNav />
         </GestureHandlerRootView>
       </NavigationContainer>
-      <GlobalLoader visible={loading} />
+      {/* <GlobalLoader visible={loading} /> */}
     </>
   );
 };

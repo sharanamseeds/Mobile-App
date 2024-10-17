@@ -27,10 +27,11 @@ import { GetServerImage } from "../../helper/helper";
 import debounce from "lodash/debounce";
 import { AuthContext } from "../../context/authContext";
 import i18n from "../../i18n";
+import GlobalLoader from "../../components/GlobalLoading";
 
 const Product = ({ navigation, route }) => {
   const [modalVisible, setModalVisible] = useState(false);
-  const [refreshing, setRefreshing] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [selectedFilter, setSelectedFilter] = useState("category");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -251,7 +252,7 @@ const Product = ({ navigation, route }) => {
   const fetchProducts = async (reset = false, searchTerm = "") => {
     if (loading || (!hasMore && !reset)) return;
     showLoader();
-    setRefreshing(false);
+    setRefreshing(true);
     try {
       const params = {
         brand_id: filters?.brand_id === "all" ? "" : filters?.brand_id,
@@ -273,7 +274,8 @@ const Product = ({ navigation, route }) => {
       }
       setTimeout(() => {
         hideLoader();
-      }, 2000);
+      }, 200);
+      setRefreshing(false);
     } catch (error) {
       console.error(error);
       hideLoader();
@@ -320,7 +322,7 @@ const Product = ({ navigation, route }) => {
   }, [filters, i18n.locale]);
 
   return (
-    <>
+    !loading ? <>
       <ThemeSafeAreaViewWOS style={{ paddingHorizontal: 15 }}>
         <ThemedView
           style={{
@@ -502,7 +504,7 @@ const Product = ({ navigation, route }) => {
         </View>
       </Modal>
       <CartItemTotal navigation={navigation} />
-    </>
+    </> : <GlobalLoader/>
   );
 };
 

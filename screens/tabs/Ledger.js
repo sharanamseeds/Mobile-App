@@ -24,6 +24,7 @@ import * as FileSystem from "expo-file-system";
 import * as Sharing from "expo-sharing";
 import i18n from "../../i18n";
 import { Buffer } from "buffer";
+import GlobalLoader from "../../components/GlobalLoading";
 
 const Ledger = ({ navigation }) => {
   const textColor = useThemeColor({}, "text");
@@ -43,10 +44,10 @@ const Ledger = ({ navigation }) => {
   });
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
-  const { showLoader, hideLoader } = useContext(AuthContext);
+  const { showLoader, hideLoader, loading } = useContext(AuthContext);
 
   const fetchLedgerList = async (searchTerm = "") => {
-    setRefreshing(true);
+    // setRefreshing(true);
     showLoader();
     try {
       const params = {
@@ -87,7 +88,7 @@ const Ledger = ({ navigation }) => {
       setRefreshing(false);
       setTimeout(() => {
         hideLoader();
-      }, 2000);
+      }, 200);
     } catch (error) {
       hideLoader();
       console.log(error);
@@ -167,7 +168,7 @@ const Ledger = ({ navigation }) => {
 
   const renderLedger = ({ item, index }) => {
     return (
-      <View key={index}>
+      !loading ? <View key={index}>
         <View
           style={{
             paddingHorizontal: 10,
@@ -238,7 +239,7 @@ const Ledger = ({ navigation }) => {
               </TouchableOpacity>
             );
           })}
-      </View>
+      </View> : <GlobalLoader/>
     );
   };
 
