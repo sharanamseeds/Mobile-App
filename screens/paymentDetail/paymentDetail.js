@@ -16,7 +16,7 @@ const PaymentDetail = ({ navigation, route }) => {
   const boxColor = useThemeColor({}, "boxColor");
   const boxShadow = useThemeColor({}, "boxShadow");
   return (
-    <ThemeSafeAreaView>
+    <ThemeSafeAreaView isReloadable={false}>
       <ThemedView>
         <View
           style={{

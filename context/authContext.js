@@ -95,7 +95,6 @@ const AuthProvider = ({ children }) => {
   };
 
   const addCart = async (data) => {
-    showLoader();
     try {
       const request = {
         product_id: data?._id,
@@ -110,11 +109,9 @@ const AuthProvider = ({ children }) => {
           cart_id: response?.data?.payload?.result?._id,
         })
       );
-      setTimeout(() => {
-        hideLoader();
-      }, 1000);
     } catch (error) {
       hideLoader();
+      console.log(error?.response?.data?.message)
       ShowErrorToast(error?.response?.data?.message);
       console.log(error);
     }

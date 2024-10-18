@@ -108,7 +108,7 @@ const MyCart = ({ navigation }) => {
 
   return (
     <>
-      <ThemeSafeAreaView style={{ flex: 1, paddingHorizontal: 15 }}>
+      <ThemeSafeAreaView style={{ flex: 1, paddingHorizontal: 15 }} isReloadable={false}>
         <ThemedView style={{ flex: 1, marginTop: 20 }}>
           <ScrollView style={{ height: screenHeight * 0.89 }} showsVerticalScrollIndicator={false}>
             {cartItem && cartItem?.length > 0 ? (
