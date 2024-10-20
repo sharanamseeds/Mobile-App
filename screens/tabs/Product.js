@@ -137,11 +137,11 @@ const Product = ({ navigation, route }) => {
               <TouchableOpacity
                 onPress={() => navigation.navigate("ProductDetail", { pid: item._id })}
               >
-                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold' }}>{item?.product_name}</ThemedText>
-                <ThemedText style={{ ...styles.price, marginTop: -2 }}>
+                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold', fontSize: 14 }}>{item?.product_name}</ThemedText>
+                <ThemedText style={{ ...styles.price, marginTop: -2, fontSize: 12 }}>
                   {item?.product_code}
                 </ThemedText>
-                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold' }}>₹ {item?.price_with_gst}</ThemedText>
+                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold', fontSize: 14 }}>₹ {item?.price_with_gst}</ThemedText>
               </TouchableOpacity>
             </View>
             {item?.in_stock ? (
@@ -152,8 +152,7 @@ const Product = ({ navigation, route }) => {
                       width: "100%",
                       backgroundColor: primaryColor,
                       padding: 5,
-                      borderRadius: 10,
-                      marginVertical: 10,
+                      borderRadius: 10
                     }}
                     disabled={checkOutOfStock(item?.quantity, item?._id)}
                     onPress={() => addCart({ ...item, qty: 1 })}
@@ -322,7 +321,7 @@ const Product = ({ navigation, route }) => {
   }, [filters, i18n.locale]);
 
   return (
-    !loading ? <>
+    <>
       <ThemeSafeAreaViewWOS style={{ paddingHorizontal: 15 }}>
         <ThemedView
           style={{
@@ -396,8 +395,8 @@ const Product = ({ navigation, route }) => {
             />
           </ThemedView>
         )}
-        {refreshing ? <ActivityIndicator size="large" color={primaryColor} /> : ""}
-        {product?.length > 0 ? (
+        {loading ? <GlobalLoader/> : ""}
+        {!loading && product?.length > 0 ? (
           <FlatList
             data={product}
             keyExtractor={(item) => item?._id}
@@ -411,7 +410,7 @@ const Product = ({ navigation, route }) => {
             windowSize={10}
             refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchProducts} />}
           />
-        ) : (
+        ) : !loading && (
           <View
             style={{
               flexDirection: "column",
@@ -504,7 +503,7 @@ const Product = ({ navigation, route }) => {
         </View>
       </Modal>
       <CartItemTotal navigation={navigation} />
-    </> : <GlobalLoader/>
+    </>
   );
 };
 
@@ -602,7 +601,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderRadius: 10,
-    marginVertical: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

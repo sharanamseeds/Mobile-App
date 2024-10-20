@@ -3,7 +3,7 @@ import { ThemedView } from "../../components/ThemedView";
 import { useThemeColor } from "../../hook/useThemeColor";
 import { Feather, Entypo } from "@expo/vector-icons";
 import { useCallback, useContext, useEffect, useState } from "react";
-import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, Image, RefreshControl, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ThemedText } from "../../components/ThemedText";
 import ThemeSafeAreaViewWOS from "../../components/ThemeSafeAreaViewWOS";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,10 +15,13 @@ import { GetServerImage } from "../../helper/helper";
 import debounce from "lodash/debounce";
 import { AuthContext } from "../../context/authContext";
 import i18n from "../../i18n";
+import { Dimensions } from "react-native";
+import GlobalLoader from "../../components/GlobalLoading";
 
 const ProductFilter = ({ navigation, route }) => {
   const params = route.params;
   const [selectedFilter, setSelectedFilter] = useState("category");
+  const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(false);
@@ -40,6 +43,7 @@ const ProductFilter = ({ navigation, route }) => {
   const boxColor = useThemeColor({}, "boxColor");
   const boxShadow = useThemeColor({}, "boxShadow");
   const background = useThemeColor({ light: lightColor, dark: darkColor }, "background");
+  const screenHeight = Dimensions.get("window").height;
 
   const checkItemInCart = (id) => {
     if (cartItem && cartItem?.length > 0) {
@@ -109,11 +113,15 @@ const ProductFilter = ({ navigation, route }) => {
               <TouchableOpacity
                 onPress={() => navigation.navigate("ProductDetail", { pid: item._id })}
               >
-                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold' }}>{item?.product_name}</ThemedText>
-                <ThemedText style={{ ...styles.price, marginTop: -2 }}>
+                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold", fontSize: 14 }}>
+                  {item?.product_name}
+                </ThemedText>
+                <ThemedText style={{ ...styles.price, marginTop: -2, fontSize: 12 }}>
                   {item?.product_code}
                 </ThemedText>
-                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: 'PoppinsBold' }}>₹ {item?.price_with_gst}</ThemedText>
+                <ThemedText style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold", fontSize: 14 }}>
+                  ₹ {item?.price_with_gst}
+                </ThemedText>
               </TouchableOpacity>
             </View>
             <View style={styles.cardButton}>
@@ -123,8 +131,7 @@ const ProductFilter = ({ navigation, route }) => {
                     width: "100%",
                     backgroundColor: primaryColor,
                     padding: 5,
-                    borderRadius: 10,
-                    marginVertical: 10,
+                    borderRadius: 10
                   }}
                   onPress={() => dispatch(ADDCART({ ...item, qty: 1 }))}
                 >
@@ -189,7 +196,7 @@ const ProductFilter = ({ navigation, route }) => {
               <ThemedText style={{ marginLeft: 5 }}>{item?.offers?.[0]?.offer_name}</ThemedText>
             </View>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center" }}>
-              <ThemedText>{i18n.t('view_offer')}</ThemedText>
+              <ThemedText>{i18n.t("view_offer")}</ThemedText>
               <Feather name="chevron-right" size={18} color={textColor} />
             </View>
           </View>
@@ -213,13 +220,14 @@ const ProductFilter = ({ navigation, route }) => {
   const fetchProducts = async (reset = false, searchTerm = "") => {
     if (loading || (!hasMore && !reset)) return;
     showLoader();
+    setRefreshing(true);
     try {
       const apiParams = {
         brand_id: filters?.brand_id === "all" ? "" : filters?.brand_id,
         category_id: filters?.category_id === "all" ? "" : filters?.category_id,
         search: searchTerm,
         page: reset ? 1 : page,
-        lang_code: i18n.locale
+        lang_code: i18n.locale,
       };
 
       const response = await axios.get(PRODUCTLIST, { params: apiParams });
@@ -232,6 +240,7 @@ const ProductFilter = ({ navigation, route }) => {
       } else {
         setHasMore(false);
       }
+      setRefreshing(false);
     } catch (error) {
       console.error(error);
     } finally {
@@ -243,7 +252,7 @@ const ProductFilter = ({ navigation, route }) => {
     try {
       const response = await axios.get(`${CATEGORYLIST}?lang_code=${i18n.locale}`);
       setCategories([
-        { _id: "all", category_name: i18n.t('all') },
+        { _id: "all", category_name: i18n.t("all") },
         ...response?.data?.payload?.result?.data,
       ]);
     } catch (error) {
@@ -254,7 +263,10 @@ const ProductFilter = ({ navigation, route }) => {
   const getBrands = async () => {
     try {
       const response = await axios.get(`${BRANDLIST}?lang_code=${i18n.locale}`);
-      setBrands([{ _id: "all", brand_name: i18n.t('all') }, ...response?.data?.payload?.result?.data]);
+      setBrands([
+        { _id: "all", brand_name: i18n.t("all") },
+        ...response?.data?.payload?.result?.data,
+      ]);
     } catch (error) {
       console.log(error);
     }
@@ -336,16 +348,38 @@ const ProductFilter = ({ navigation, route }) => {
             />
           </ThemedView>
         )}
-        <FlatList
-          data={product}
-          keyExtractor={(item) => item?._id}
-          renderItem={renderProduct}
-          onEndReached={() => fetchProducts()}
-          onEndReachedThreshold={0.5}
-          initialNumToRender={10}
-          maxToRenderPerBatch={5}
-          windowSize={10}
-        />
+        {loading && <GlobalLoader/>}
+        {!loading && product?.length > 0 ? (
+          <FlatList
+            data={product}
+            keyExtractor={(item) => item?._id}
+            renderItem={renderProduct}
+            showsVerticalScrollIndicator={false}
+            onEndReached={() => product?.length > 4 && fetchProducts()}
+            onEndReachedThreshold={0.5}
+            initialNumToRender={10}
+            maxToRenderPerBatch={5}
+            windowSize={10}
+            refreshControl={<RefreshControl refreshing={refreshing} onRefresh={fetchProducts} />}
+          />
+        ) : !loading && (
+          <View
+            style={{
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              height: screenHeight - 250,
+            }}
+          >
+            <Image
+              source={require("../../assets/images/shopping-bag_5006896.png")}
+              style={{ width: 100, height: 100 }}
+            />
+            <ThemedText type="title" style={{ fontSize: 22 }}>
+              {i18n.t("product_not_found")}
+            </ThemedText>
+          </View>
+        )}
       </ThemeSafeAreaViewWOS>
       <CartItemTotal navigation={navigation} />
     </>
@@ -446,7 +480,6 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
     borderWidth: 1,
     borderRadius: 10,
-    marginVertical: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",

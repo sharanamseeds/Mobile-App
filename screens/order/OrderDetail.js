@@ -363,15 +363,15 @@ const OrderDetail = ({ navigation, route }) => {
                         onPress={() => navigation.navigate("ProductDetail", { pid: item.product_id })}
                       >
                         <ThemedText
-                          style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold" }}
+                          style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold", fontSize: 14 }}
                         >
                           {item?.product_name}
                         </ThemedText>
-                        <ThemedText style={{ ...styles.price, marginTop: -2 }}>
+                        <ThemedText style={{ ...styles.price, marginTop: -2, fontSize: 12 }}>
                           {item?.product_code}
                         </ThemedText>
                         <ThemedText
-                          style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold" }}
+                          style={{ ...styles.title, fontWeight: 600, fontFamily: "PoppinsBold", fontSize: 14 }}
                         >
                           ₹ {item?.total_amount?.toFixed(2)}
                         </ThemedText>

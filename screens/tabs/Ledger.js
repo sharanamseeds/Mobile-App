@@ -14,7 +14,7 @@ import { ThemedText } from "../../components/ThemedText";
 import { useCallback, useContext, useEffect, useState } from "react";
 import axios from "axios";
 import { AuthContext } from "../../context/authContext";
-import { LEDGERLIST, USERDETAIL } from "../../constant/ApiRoutes";
+import { LEDGERLIST } from "../../constant/ApiRoutes";
 import moment from "moment";
 import ThemeSafeAreaViewWOS from "../../components/ThemeSafeAreaViewWOS";
 import { SearchBar } from "react-native-elements";
@@ -25,6 +25,7 @@ import * as Sharing from "expo-sharing";
 import i18n from "../../i18n";
 import { Buffer } from "buffer";
 import GlobalLoader from "../../components/GlobalLoading";
+import DatePicker from "../../components/CustomDatePicker";
 
 const Ledger = ({ navigation }) => {
   const textColor = useThemeColor({}, "text");
@@ -40,10 +41,14 @@ const Ledger = ({ navigation }) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [filter, setFilter] = useState({
     type: "",
-    date: ""
+    date: "",
   });
   const [refreshing, setRefreshing] = useState(false);
   const [search, setSearch] = useState("");
+  const [showFromDate, setShowFromDate] = useState(false)
+  const [showToDate, setShowToDate] = useState(false)
+  const [fromDate, setFromDate] = useState(new Date())
+  const [toDate, setToDate] = useState(new Date())
   const { showLoader, hideLoader, loading } = useContext(AuthContext);
 
   const fetchLedgerList = async (searchTerm = "") => {
@@ -55,6 +60,8 @@ const Ledger = ({ navigation }) => {
         category: filter?.type,
         date: filter?.date,
         lang_code: i18n.locale,
+        from: filter?.date === "custom" ? moment(fromDate).format('YYYY-MM-DD') : null,
+        to: filter?.date === "custom" ? moment(toDate).format('YYYY-MM-DD') : null
       };
 
       const response = await axios.get(LEDGERLIST, { params });
@@ -168,7 +175,7 @@ const Ledger = ({ navigation }) => {
 
   const renderLedger = ({ item, index }) => {
     return (
-      !loading ? <View key={index}>
+      <View key={index}>
         <View
           style={{
             paddingHorizontal: 10,
@@ -239,9 +246,17 @@ const Ledger = ({ navigation }) => {
               </TouchableOpacity>
             );
           })}
-      </View> : <GlobalLoader/>
-    );
+      </View>
+    )
   };
+
+  const renderLedgerFun = ({item, index}) => {
+    if (!loading) {
+      return renderLedger({item, index})
+    } else {
+      return <GlobalLoader />
+    }
+  }
 
   // Create a debounced version of the fetchResults function
   const debouncedFetchResults = useCallback(
@@ -274,7 +289,7 @@ const Ledger = ({ navigation }) => {
         data={ledgerList}
         keyExtractor={(item, index) => index}
         showsVerticalScrollIndicator={false}
-        renderItem={renderLedger}
+        renderItem={renderLedgerFun}
         ListHeaderComponent={
           <>
             <ThemedView
@@ -464,7 +479,7 @@ const Ledger = ({ navigation }) => {
               ...styles.modalView,
               backgroundColor: boxColor,
               shadowColor: boxShadow,
-              height: "80%",
+              height: "auto",
             }}
           >
             <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -696,10 +711,87 @@ const Ledger = ({ navigation }) => {
                 ></View>
                 <ThemedText>{i18n.t("last_one_year")}</ThemedText>
               </TouchableOpacity>
+              <TouchableOpacity
+                style={{ flexDirection: "row" }}
+                onPress={() => {
+                  setFilter({ ...filter, date: "custom" });
+                }}
+              >
+                <View
+                  style={{
+                    ...styles.radio,
+                    borderRadius: 50,
+                    borderColor: primaryColor,
+                    backgroundColor: filter?.date === "custom" ? primaryColor : "transparent",
+                    marginRight: 10,
+                    marginBottom: 10,
+                  }}
+                ></View>
+                <ThemedText>{i18n.t("custom")}</ThemedText>
+              </TouchableOpacity>
+              {filter?.date === "custom" && <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+                <TouchableOpacity style={{ width: "45%" }} onPress={() => setShowFromDate(true)}>
+                  <ThemedText>From</ThemedText>
+                  <View
+                    style={{
+                      height: 40,
+                      borderColor: primaryColor,
+                      borderWidth: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 5,
+                    }}
+                  >
+                    <Feather name="calendar" color={textColor} size={15} />
+                    <ThemedText style={{marginLeft: 5, marginTop: 4}}>{fromDate.toLocaleDateString()}</ThemedText>
+                  </View>
+                </TouchableOpacity>
+                <TouchableOpacity style={{ width: "45%" }} onPress={() => setShowToDate(true)}>
+                  <ThemedText>To</ThemedText>
+                  <View
+                    style={{
+                      height: 40,
+                      borderColor: primaryColor,
+                      borderWidth: 1,
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: 5,
+                    }}
+                  >
+                    <Feather name="calendar" color={textColor} size={15} />
+                    <ThemedText style={{marginLeft: 5, marginTop: 4}}>{toDate.toLocaleDateString()}</ThemedText>
+                  </View>
+                </TouchableOpacity>
+              </View>}
+              {filter?.date === "custom" && <TouchableOpacity
+              style={{
+                flexDirection: "row",
+                backgroundColor: secondaryColor,
+                width: "100%",
+                padding: 6,
+                borderRadius: 50,
+                marginTop: 15,
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+              onPress={() => {
+                fetchLedgerList()
+                setModalVisible(false);
+              }}
+            >
+              <Feather name="check-circle" size={18} color={"#FFF"} />
+              <Text style={{ color: "#FFF", marginLeft: 5, fontSize: 18 }}>
+                {i18n.t("apply")}
+              </Text>
+            </TouchableOpacity>}
             </View>
           </View>
         </View>
       </Modal>
+      <DatePicker show={showFromDate} date={fromDate} setShow={setShowFromDate} setDate={setFromDate}/>
+      <DatePicker show={showToDate} date={toDate} setShow={setShowToDate} setDate={setToDate}/>
     </ThemeSafeAreaViewWOS>
   );
 };

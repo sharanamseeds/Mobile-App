@@ -120,5 +120,7 @@
     "payment_detail": "Payment Detail",
     "payment_amounts": "Payable Amount",
     "payment_date": "Payment Date",
-    "invoice_id": "Invoice Id"
+    "invoice_id": "Invoice Id",
+    "custom": "Select Custom Date",
+    "apply": "Apply Filter"
 }
