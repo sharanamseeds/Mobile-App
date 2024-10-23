@@ -191,7 +191,7 @@ const MyOrder = ({ navigation }) => {
     });
   }, [filter, i18n.locale]);
 
-  return !loading ? (
+  return (
     <ThemeSafeAreaViewWOS style={{ paddingHorizontal: 15 }}>
       <View style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center" }}>
         <ThemedText type="title" style={{ fontSize: 22 }}>
@@ -218,7 +218,6 @@ const MyOrder = ({ navigation }) => {
       <ThemedView style={{ marginTop: 10, marginBottom: 50 }}>
         {orderListData && orderListData?.length > 0 ? (
           <>
-            {refreshing ? <ActivityIndicator size="large" color={primaryColor} /> : ""}
             <FlatList
               data={orderListData}
               keyExtractor={(item) => item?._id}
@@ -233,7 +232,7 @@ const MyOrder = ({ navigation }) => {
               refreshControl={<RefreshControl refreshing={refreshing} onRefresh={orderList} />}
             />
           </>
-        ) : (
+        ) : !loading && (
           <View
             style={{
               flexDirection: "column",
@@ -251,6 +250,7 @@ const MyOrder = ({ navigation }) => {
             </ThemedText>
           </View>
         )}
+        {loading && <GlobalLoader/>}
       </ThemedView>
       <Modal
         animationType="slide"
@@ -335,9 +335,7 @@ const MyOrder = ({ navigation }) => {
         </View>
       </Modal>
     </ThemeSafeAreaViewWOS>
-  ) : (
-    <GlobalLoader />
-  );
+  )
 };
 
 export default MyOrder;

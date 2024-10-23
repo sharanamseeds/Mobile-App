@@ -395,15 +395,14 @@ const Product = ({ navigation, route }) => {
             />
           </ThemedView>
         )}
-        {loading ? <GlobalLoader/> : ""}
-        {!loading && product?.length > 0 ? (
+        {product?.length > 0 ? (
           <FlatList
             data={product}
             keyExtractor={(item) => item?._id}
             renderItem={renderProduct}
             showsVerticalScrollIndicator={false}
             //ListFooterComponent={renderFooter}
-            onEndReached={() => product?.length > 4 && fetchProducts()}
+            onEndReached={() => fetchProducts()}
             onEndReachedThreshold={0.5}
             initialNumToRender={10}
             maxToRenderPerBatch={5}
@@ -428,6 +427,7 @@ const Product = ({ navigation, route }) => {
             </ThemedText>
           </View>
         )}
+        {loading ? <GlobalLoader/> : ""}
       </ThemeSafeAreaViewWOS>
       <Modal
         animationType="slide"
