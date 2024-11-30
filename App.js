@@ -10,8 +10,9 @@ import { Entypo, Feather, FontAwesome, MaterialCommunityIcons } from "@expo/vect
 import Toast from 'react-native-toast-message';
 import './config/axios'
 
+// eas credentials
 // npx expo install --fix
-//eas build -p android --profile preview
+// eas build -p android --profile preview
 
 export default function App() {
   const [fontsLoaded, fontError] = useFonts({
